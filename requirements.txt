@@ -1,0 +1,17 @@
+django-rest-framework
+django-crispy-forms
+crispy-bootstrap5
+djangorestframework
+django-filter
+Pillow
+djangorestframework-simplejwt
+transbank-sdk
+humanize
+# Facturación electrónica
+reportlab>=3.6.0
+requests>=2.25.0
+django-environ
+gunicorn
+whitenoise
+django-storages[boto3]
+pytz

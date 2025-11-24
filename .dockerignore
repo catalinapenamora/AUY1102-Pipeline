@@ -1,0 +1,12 @@
+# .dockerignore
+# Archivos y carpetas a ignorar al construir la imagen
+**/__pycache__
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+.git
+.gitignore
+db.sqlite3
+.DS_Store

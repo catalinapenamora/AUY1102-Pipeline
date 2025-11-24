@@ -1,0 +1,487 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>API Externa - AutoParts</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link rel="icon" href="{% static 'img/favicon.ico.png' %}" type="image/x-icon">
+
+    <!-- Fuentes y estilos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Bootstrap y estilos -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    <!-- Prism.js para resaltado de código -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+    <style>
+        .hero-api {
+            background: linear-gradient(135deg, #780000 0%, #003049 100%);
+            color: white;
+            padding: 60px 0;
+        }
+        
+        .api-card {
+            border-left: 4px solid #780000;
+            transition: all 0.3s ease;
+        }
+        
+        .api-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .method-badge {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .method-get { background-color: #28a745; color: white; }
+        .method-post { background-color: #007bff; color: white; }
+        
+        .code-block {
+            background: #2d3748;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        .endpoint-url {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid #780000;
+        }
+        
+        .response-example {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+
+    {% include "base/header.html" %}
+</head>
+<body>
+
+<!-- Hero Section -->
+<div class="hero-api">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-4 mb-4">
+                <i class="fas fa-code"></i> API Externa AutoParts
+            </h1>
+            <p class="lead">
+                Integra nuestro catálogo de productos con tu sistema
+            </p>
+            <p class="mb-4">
+                API RESTful para talleres, distribuidores y sistemas externos
+            </p>
+            <a href="#documentacion" class="btn btn-light btn-lg me-3">
+                <i class="fas fa-book"></i> Ver Documentación
+            </a>
+            <a href="{% url 'taller-manolo' %}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-wrench"></i> Demo: Taller de Manolo
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5" id="documentacion">
+    <!-- Introducción -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card api-card">
+                <div class="card-body">
+                    <h2 class="card-title">
+                        <i class="fas fa-info-circle text-primary"></i> ¿Qué es la API Externa?
+                    </h2>
+                    <p class="card-text">
+                        Nuestra API Externa permite a sistemas externos (como el <strong>Taller de Manolo</strong>, 
+                        distribuidores, y otros negocios) consultar nuestro catálogo de productos de forma programática.
+                    </p>
+                    
+                    <h5>Casos de Uso:</h5>
+                    <ul>
+                        <li><strong>Talleres Mecánicos:</strong> Consultar disponibilidad de repuestos en tiempo real</li>
+                        <li><strong>Sistemas de Inventario:</strong> Sincronizar catálogos automáticamente</li>
+                        <li><strong>Distribuidores:</strong> Obtener precios y stock actualizados</li>
+                        <li><strong>Aplicaciones Móviles:</strong> Mostrar productos de AutoParts</li>
+                    </ul>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-key"></i>
+                        <strong>Autenticación Requerida:</strong> 
+                        Necesitas una API Key válida para acceder a los endpoints.
+                        Contacta a <strong>api@autoparts.cl</strong> para obtener acceso.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Autenticación -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card api-card">
+                <div class="card-body">
+                    <h3><i class="fas fa-shield-alt text-success"></i> Autenticación</h3>
+                    
+                    <p>Incluye tu API Key en cada request de una de estas maneras:</p>
+                    
+                    <h5>Opción 1: Header HTTP (Recomendado)</h5>
+                    <div class="code-block">
+                        <pre><code class="language-http">GET /api/external/catalog/
+Host: autoparts.cl
+X-API-Key: TALLER_MANOLO_2024</code></pre>
+                    </div>
+                    
+                    <h5 class="mt-4">Opción 2: Parámetro GET</h5>
+                    <div class="endpoint-url">
+                        GET /api/external/catalog/?api_key=TALLER_MANOLO_2024
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <strong>API Keys de Prueba:</strong><br>
+                        • <code>DEMO_KEY_2024</code> - Para testing<br>
+                        • <code>TALLER_MANOLO_2024</code> - Ejemplo del Taller de Manolo
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Endpoints -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4"><i class="fas fa-plug text-primary"></i> Endpoints Disponibles</h2>
+        </div>
+    </div>
+
+    <!-- Información de la API -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card api-card">
+                <div class="card-body">
+                    <h4>
+                        <span class="method-badge method-get">GET</span>
+                        Información de la API
+                    </h4>
+                    <div class="endpoint-url mb-3">
+                        GET /api/external/info/
+                    </div>
+                    <p>Obtiene información básica sobre la API y sus endpoints.</p>
+                    
+                    <h6>Ejemplo de respuesta:</h6>
+                    <div class="code-block response-example">
+                        <pre><code class="language-json">{
+  "success": true,
+  "timestamp": "2024-12-27T10:30:00.000Z",
+  "message": "Información de la API obtenida exitosamente",
+  "data": {
+    "api_name": "AutoParts External Catalog API",
+    "version": "1.0",
+    "description": "API para consulta externa del catálogo de productos AutoParts",
+    "endpoints": {
+      "catalog": "/api/external/catalog/ - Lista de productos",
+      "product_detail": "/api/external/catalog/{id}/ - Detalle de producto",
+      "categories": "/api/external/categories/ - Lista de categorías",
+      "search": "/api/external/search/ - Búsqueda de productos"
+    }
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catálogo de Productos -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card api-card">
+                <div class="card-body">
+                    <h4>
+                        <span class="method-badge method-get">GET</span>
+                        Catálogo de Productos
+                    </h4>
+                    <div class="endpoint-url mb-3">
+                        GET /api/external/catalog/
+                    </div>
+                    <p>Obtiene la lista completa de productos con paginación y filtros.</p>
+                    
+                    <h6>Parámetros de consulta:</h6>
+                    <ul>
+                        <li><code>page</code> - Número de página (default: 1)</li>
+                        <li><code>limit</code> - Productos por página (default: 20, max: 100)</li>
+                        <li><code>category</code> - Filtrar por ID de categoría</li>
+                        <li><code>search</code> - Búsqueda por nombre o descripción</li>
+                        <li><code>min_price</code> - Precio mínimo</li>
+                        <li><code>max_price</code> - Precio máximo</li>
+                        <li><code>in_stock</code> - true/false para filtrar por stock</li>
+                    </ul>
+                    
+                    <h6>Ejemplo de uso:</h6>
+                    <div class="endpoint-url">
+                        GET /api/external/catalog/?category=1&in_stock=true&limit=10
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalle de Producto -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card api-card">
+                <div class="card-body">
+                    <h4>
+                        <span class="method-badge method-get">GET</span>
+                        Detalle de Producto
+                    </h4>
+                    <div class="endpoint-url mb-3">
+                        GET /api/external/catalog/{product_id}/
+                    </div>
+                    <p>Obtiene los detalles completos de un producto específico.</p>
+                    
+                    <h6>Ejemplo de respuesta:</h6>
+                    <div class="code-block response-example">
+                        <pre><code class="language-json">{
+  "success": true,
+  "timestamp": "2024-12-27T10:30:00.000Z",
+  "message": "Detalles del producto obtenidos exitosamente",
+  "data": {
+    "id": 123,
+    "nombre": "Filtro de Aceite Premium",
+    "descripcion": "Filtro de aceite de alta calidad para motores...",
+    "marca": "AutoParts",
+    "precio": 15990.0,
+    "precio_mayorista": 12000.0,
+    "stock": 50,
+    "categoria": {
+      "id": 1,
+      "nombre": "Filtros",
+      "descripcion": "Filtros para vehículos"
+    },
+    "especificaciones": {
+      "peso": 0.5,
+      "dimensiones": {
+        "largo": 10.0,
+        "ancho": 8.0,
+        "alto": 8.0
+      }
+    },
+    "disponibilidad": {
+      "en_stock": true,
+      "cantidad_disponible": 50,
+      "estado": "disponible"
+    },
+    "precios": {
+      "precio_unitario": 15990.0,
+      "precio_mayorista": 12000.0,
+      "incluye_iva": true,
+      "moneda": "CLP"
+    }
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card api-card">
+                <div class="card-body">
+                    <h4>
+                        <span class="method-badge method-get">GET</span>
+                        Búsqueda de Productos
+                    </h4>
+                    <div class="endpoint-url mb-3">
+                        GET /api/external/search/
+                    </div>
+                    <p>Búsqueda avanzada de productos.</p>
+                    
+                    <h6>Parámetros requeridos:</h6>
+                    <ul>
+                        <li><code>q</code> - Término de búsqueda (obligatorio)</li>
+                    </ul>
+                    
+                    <h6>Parámetros opcionales:</h6>
+                    <ul>
+                        <li><code>category</code> - Filtrar por categoría</li>
+                        <li><code>limit</code> - Límite de resultados (default: 10, max: 50)</li>
+                    </ul>
+                    
+                    <h6>Ejemplo de uso:</h6>
+                    <div class="endpoint-url">
+                        GET /api/external/search/?q=filtro&category=1&limit=5
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ejemplo de Integración -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card api-card">
+                <div class="card-body">
+                    <h3><i class="fas fa-code text-success"></i> Ejemplo de Integración</h3>
+                    <p>Aquí tienes un ejemplo de cómo el <strong>Taller de Manolo</strong> podría integrar la API:</p>
+                    
+                    <h5>Python con requests:</h5>
+                    <div class="code-block">
+                        <pre><code class="language-python">import requests
+
+# Configuración
+API_BASE = "https://autoparts.cl/api/external"
+API_KEY = "TALLER_MANOLO_2024"
+
+headers = {
+    "X-API-Key": API_KEY,
+    "Content-Type": "application/json"
+}
+
+# Buscar filtros de aceite
+def buscar_filtros():
+    response = requests.get(
+        f"{API_BASE}/search/", 
+        headers=headers,
+        params={"q": "filtro aceite", "limit": 10}
+    )
+    
+    if response.status_code == 200:
+        data = response.json()
+        if data["success"]:
+            productos = data["data"]
+            for producto in productos:
+                print(f"Producto: {producto['nombre']}")
+                print(f"Precio: ${producto['precio']:,.0f}")
+                print(f"Stock: {producto['stock']} unidades")
+                print(f"Disponible: {'Sí' if producto['disponible'] else 'No'}")
+                print("-" * 50)
+        else:
+            print(f"Error: {data['message']}")
+    else:
+        print(f"Error HTTP: {response.status_code}")
+
+# Obtener detalle de un producto específico
+def detalle_producto(product_id):
+    response = requests.get(
+        f"{API_BASE}/catalog/{product_id}/",
+        headers=headers
+    )
+    
+    if response.status_code == 200:
+        data = response.json()
+        if data["success"]:
+            producto = data["data"]
+            print(f"Nombre: {producto['nombre']}")
+            print(f"Descripción: {producto['descripcion']}")
+            print(f"Precio: ${producto['precio']:,.0f}")
+            print(f"Stock disponible: {producto['stock']} unidades")
+            if producto['categoria']:
+                print(f"Categoría: {producto['categoria']['nombre']}")
+        else:
+            print(f"Error: {data['message']}")
+
+# Usar las funciones
+if __name__ == "__main__":
+    print("=== Búsqueda de Filtros ===")
+    buscar_filtros()
+    
+    print("\n=== Detalle del Producto ID 1 ===")
+    detalle_producto(1)</code></pre>
+                    </div>
+                    
+                    <h5 class="mt-4">JavaScript/Node.js:</h5>
+                    <div class="code-block">
+                        <pre><code class="language-javascript">const axios = require('axios');
+
+const API_BASE = 'https://autoparts.cl/api/external';
+const API_KEY = 'TALLER_MANOLO_2024';
+
+const api = axios.create({
+    baseURL: API_BASE,
+    headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+    }
+});
+
+// Obtener catálogo con filtros
+async function obtenerCatalogo(filtros = {}) {
+    try {
+        const response = await api.get('/catalog/', { params: filtros });
+        
+        if (response.data.success) {
+            console.log(`Encontrados ${response.data.data.length} productos`);
+            response.data.data.forEach(producto => {
+                console.log(`- ${producto.nombre}: $${producto.precio.toLocaleString()}`);
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error.response?.data?.message || error.message);
+    }
+}
+
+// Ejemplo de uso
+obtenerCatalogo({
+    category: 1,
+    in_stock: true,
+    limit: 5
+});</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contacto y Soporte -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card api-card">
+                <div class="card-body text-center">
+                    <h3><i class="fas fa-headset text-primary"></i> Soporte y Contacto</h3>
+                    <p>¿Necesitas ayuda con la integración o quieres solicitar una API Key?</p>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5><i class="fas fa-envelope"></i> Email de API</h5>
+                            <p><a href="mailto:api@autoparts.cl">api@autoparts.cl</a></p>
+                        </div>
+                        <div class="col-md-4">
+                            <h5><i class="fas fa-life-ring"></i> Soporte Técnico</h5>
+                            <p><a href="mailto:soporte@autoparts.cl">soporte@autoparts.cl</a></p>
+                        </div>
+                        <div class="col-md-4">
+                            <h5><i class="fas fa-clock"></i> Horario de Atención</h5>
+                            <p>Lunes a Viernes<br>9:00 - 18:00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "base/footer.html" %}
+
+<!-- Scripts -->
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+
+</body>
+</html>

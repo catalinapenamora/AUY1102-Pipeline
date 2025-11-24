@@ -1,0 +1,292 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>AutoParts</title>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <meta content="" name="keywords">
+        <meta content="" name="description">
+
+         <!-- Favicon -->
+        <link rel="icon" href="{% static 'img/favicon.ico.png' %}" type="image/x-icon"> 
+        <!-- Google Web Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&amp;family=Raleway:wght@600;800&amp;display=swap" rel="stylesheet"> 
+
+        <!-- Icon Font Stylesheet -->
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+        <!-- Libraries Stylesheet -->
+        <link href="{% static 'lib/lightbox/css/lightbox.min.css' %}" rel="stylesheet">
+        <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+
+        <!-- Customized Bootstrap Stylesheet -->
+        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+
+        <!-- Template Stylesheet -->
+        <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    </head>
+
+    <body>
+        {% include "base/header.html" %}
+
+<!-- Modal de Búsqueda -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content rounded-0">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">Buscar por palabra clave</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body d-flex align-items-center">
+                <div class="input-group w-75 mx-auto d-flex">
+                    <input type="search" class="form-control p-3" placeholder="Buscar repuestos, marcas, códigos..." aria-describedby="search-icon-1">
+                    <span id="search-icon-1" class="input-group-text p-3"><i class="fa fa-search"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--FIN Modal de Búsqueda -->
+
+<!-- Hero Start -->
+<div class="container-fluid py-5 mb-5 hero-header">
+    <div class="container py-5">
+        <div class="row g-5 align-items-center">
+            <div class="col-md-12 col-lg-7">
+                <h4 class="mb-3" style="color: #669BBC;">Compra confiable y rápida</h4>
+                <h1 class="mb-4 display-3" style="color: #FDF0D5;">Repuestos y Accesorios Automotrices</h1>
+                <div class="mt-4">
+                    <p class="lead text-blanco-suave">Explora nuestros productos destacados y encuentra el repuesto perfecto para tu vehículo.</p>
+                    <a href="{% url 'catalogo' %}" class="btn btn-lg rounded-pill px-5 py-3" style="background-color: #C1121F; color: #FDF0D5; font-weight: bold; box-shadow: 0 0 10px rgba(0,0,0,0.3); transition: 0.3s;">
+                    Ir al Catálogo
+                    <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+                </div>            
+            <div class="col-md-12 col-lg-5">
+                <div id="carouselId" class="carousel slide position-relative" data-bs-ride="carousel">
+                    <div class="carousel-inner" role="listbox">
+                        <div class="carousel-item rounded active">
+                            <img src="{% static 'img/hero-img-1.png' %}" class="img-fluid w-100 h-100 bg-secondary rounded" alt="Oferta 1">
+                        </div>
+                        <div class="carousel-item rounded">
+                            <img src="{% static 'img/hero-img-2.jpg' %}" class="img-fluid w-100 h-100 bg-secondary rounded" alt="Oferta 2">
+                        </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselId" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselId" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Siguiente</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Hero End -->
+
+<!-- Beneficios Principales -->
+<div class="container-fluid featurs py-5">
+    <div class="container py-5">
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="featurs-item text-center rounded bg-personalizado p-4">
+                <div class="featurs-icon mb-5 mx-auto">
+                    <i class="fas fa-car-side fa-3x text-white"></i> 
+                </div>
+                <div class="featurs-content text-center">
+                    <h5 class="text-azul">Envío Gratis</h5>
+                    <p class="mb-0 text-celeste">En compras sobre $300.000 CLP</p>
+                </div>
+            </div>            
+        </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="featurs-item text-center rounded bg-personalizado p-4">
+                    <div class="featurs-icon mb-5 mx-auto">
+
+                        <i class="fas fa-user-shield fa-3x text-white"></i>
+                    </div>
+                    <div class="featurs-content text-center">
+                        <h5>Pago Seguro</h5>
+                        <p class="mb-0">Protección de datos y transacciones</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="featurs-item text-center rounded bg-personalizado p-4">
+                    <div class="featurs-icon mb-5 mx-auto">
+                        <i class="fas fa-exchange-alt fa-3x text-white"></i>
+                    </div>
+                    <div class="featurs-content text-center">
+                        <h5>Cambios y Devoluciones</h5>
+                        <p class="mb-0">Hasta 30 días garantizados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="featurs-item text-center rounded bg-personalizado p-4">
+                    <div class="featurs-icon mb-5 mx-auto">
+                        <i class="fa fa-phone-alt fa-3x text-white"></i>
+                    </div>
+                    <div class="featurs-content text-center">
+                        <h5>Soporte 24/7</h5>
+                        <p class="mb-0">Atención rápida y personalizada</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- FIN Beneficios Principales -->
+
+
+
+<!-- Ofertas Especiales Start -->
+<div class="container-fluid service py-5">
+    <div class="container py-5">
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-4">
+            <a href="#">
+                <div class="service-item bg-oferta rounded border border-rojo">
+                <img src="{% static 'img/best-product-3.jpg' %}" class="img-fluid rounded-top w-100" alt="Pastillas de freno">
+                <div class="px-4 rounded-bottom">
+                    <div class="service-content bg-destacado text-center p-4 rounded">
+                    <h5 class="text-white">Pastillas de freno</h5>
+                    <h3 class="mb-0">15% de descuento</h3>
+                    </div>
+                </div>
+                </div>
+            </a>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <a href="#">
+                    <div class="service-item bg-oferta rounded border border-rojo">
+                        <img src="{% static 'img/best-product-1.jpg' %}" class="img-fluid rounded-top w-100" alt="Oil Filter">
+                        <div class="px-4 rounded-bottom">
+                            <div class="service-content bg-destacado text-center p-4 rounded">
+                                <h5 class="text-white">Filtros de aceite</h5>
+                                <h3 class="mb-0">Envío gratis</h3>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="#">
+                    <div class="service-item bg-oferta rounded border border-rojo">
+                        <img src="{% static 'img/best-product-2.jpg' %}" class="img-fluid rounded-top w-100" alt="Spark Plugs">
+                        <div class="px-4 rounded-bottom">
+                            <div class="service-content bg-destacado text-center p-4 rounded">
+                                <h5 class="text-white">Bujías</h5>
+                                <h3 class="mb-0">5% de descuento</h3>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Ofertas Especiales End -->
+
+<!-- Bestseller Products Start -->
+<div class="container-fluid py-5 bg-bestseller-section">
+  <div class="container py-5">
+    <div class="text-center mx-auto mb-5" style="max-width: 700px;">
+      <h1 class="display-5 fw-bold text-azul position-relative d-inline-block section-title">
+        Productos Más Vendidos
+      </h1>
+      <p class="text-celeste mt-3">Descubre los repuestos más populares entre nuestros clientes.<br>Calidad y garantía para tu vehículo.</p>
+    </div>
+    <div class="row g-4" id="bestseller"></div>
+  </div>
+</div>
+<!-- Bestseller Products End -->
+
+
+ {% include "base/footer.html" %}
+
+
+
+        <!-- Back to Top -->
+ 
+<a href="#" class="btn-volver-arriba back-to-top">
+  <i class="fa fa-arrow-up"></i>
+</a>
+        <div id="lightboxOverlay" tabindex="-1" class="lightboxOverlay" style="display: none;"></div><div id="lightbox" tabindex="-1" class="lightbox" style="display: none;"><div class="lb-outerContainer"><div class="lb-container"><img class="lb-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt=""><div class="lb-nav"><a class="lb-prev" role="button" tabindex="0" aria-label="Previous image" href=""></a><a class="lb-next" role="button" tabindex="0" aria-label="Next image" href=""></a></div><div class="lb-loader"><a class="lb-cancel" role="button" tabindex="0"></a></div></div></div><div class="lb-dataContainer"><div class="lb-data"><div class="lb-details"><span class="lb-caption"></span><span class="lb-number"></span></div><div class="lb-closeContainer"><a class="lb-close" role="button" tabindex="0"></a></div></div></div></div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <!-- Bootstrap -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Main JS -->
+        <script src="{% static 'js/main.js' %}"></script>
+
+        <!-- Plugins dependientes de jQuery -->
+        <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+        <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+        <script src="{% static 'lib/lightbox/js/lightbox.min.js' %}"></script>
+        <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+        <script>
+  window.ES_EMPRESA = {{ es_empresa|yesno:"true,false" }};
+</script>
+        <script>console.log("home.js cargado");
+document.addEventListener("DOMContentLoaded", () => {
+    function cargarProductos() {
+        let url = "/api/productos/";
+
+        fetch(url)
+            .then(res => res.json())
+            .then(productos => {
+                const container = document.getElementById("bestseller");
+                if (!container) {
+                    console.error("No se encontró el contenedor #bestseller");
+                    return;
+                }
+                container.innerHTML = '';
+
+                productos.productos.slice(0, 3).forEach(p => {
+                    console.log("Producto:", p.nombre, "Precio:", p.precio, "Mayorista:", p.precio_mayorista, "ES_EMPRESA:", window.ES_EMPRESA);
+                    const precioMostrar = window.ES_EMPRESA ? p.precio_mayorista : p.precio;
+                    const card = `
+                        <div class="col-md-6 col-lg-4 loaded">
+                            <div class="card h-100 card-hover bg-bestseller border-0 rounded shadow-sm">
+                                <img src="${p.imagen}" class="card-img-top img-fluid rounded-top" alt="${p.nombre}" style="max-height: 250px; object-fit: cover; border-bottom: 4px solid #C1121F;">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-azul fw-bold">${p.nombre}</h5>
+                                    <div class="d-flex justify-content-center my-2">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star text-muted"></i>
+                                    </div>
+                                    <div class="price-info">
+                                        <h4 class="mb-1 text-dark fw-semibold">${precioMostrar.toLocaleString("es-CL", { style: "currency", currency: "CLP" })}</h4>
+                                        <small class="text-muted">IVA incluido</small>
+                                    </div>
+                                    <a href="/producto/${p.id}" class="btn-bestseller mt-2">Ver producto <i class="fas fa-arrow-right ms-1"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            })
+            .catch(err => console.error("Error cargando productos:", err));
+    }
+
+    cargarProductos();
+});</script>
+    </body>
+</html>

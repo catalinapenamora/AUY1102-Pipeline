@@ -1,0 +1,276 @@
+{% load static humanize %}
+{% load custom_filters %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>s
+  <meta charset="UTF-8">
+  <title>Pago Exitoso | AutoParts</title>
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/style.css' %}" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .card {
+      transition: transform 0.2s ease-in-out;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+    }
+    .table th {
+      border-top: none;
+      font-weight: 600;
+    }
+    .img-thumbnail {
+      border-radius: 8px;
+      border: 2px solid #e9ecef;
+    }
+    .badge {
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+  {% include 'base/header.html' %}
+  <main style="padding-top: 180px;">
+    <div class="container text-center">
+      <div class="alert alert-success">
+        <h2 class="mb-4">¡Pago realizado con éxito! ✅</h2>
+        <p>Gracias por tu compra. Aquí tienes el resumen del pedido:</p>
+      </div>
+
+      <div class="card shadow-sm p-4 mb-4">
+        <h4 class="mb-3">Resumen del Pedido</h4>
+        <p><strong>Correo:</strong> {{ email }}</p>
+        <p><strong>Monto total:</strong> <span id="montoTotal">${{ monto }}</span></p>
+        <p><strong>ID de Orden:</strong> {{ order_id }}</p>
+        <p><strong>Método de Pago:</strong> {{ metodo|title }}</p>
+        <p><strong>Tipo de entrega:</strong> 
+          {% if pedido.retiro_en_tienda %}
+            🏪 Retiro en tienda
+          {% elif pedido.envio_domicilio %}
+            🚚 Envío a domicilio
+          {% endif %}
+        </p>
+        
+        {% if pedido.envio_domicilio %}
+        <div class="mt-3 p-3 bg-light rounded">
+          <h6>📍 Datos de envío:</h6>
+          <p><strong>Dirección:</strong> {{ pedido.direccion }}</p>
+          <p><strong>Comuna:</strong> {{ pedido.comuna }}</p>
+          <p><strong>Región:</strong> {{ pedido.region }}</p>
+          
+          {% if pedido.ot_codigo %}
+          <div class="mt-2 p-3 border border-success rounded" style="background-color: #d4edda; border-color: #c3e6cb;">
+            <h6 class="text-success mb-2">📦 Información de Envío</h6>
+            <p class="mb-1"><strong>Orden de Transporte:</strong> <span class="text-dark">{{ pedido.ot_codigo }}</span></p>
+            {% if pedido.etiqueta_url %}
+            <p class="mb-1"><a href="{{ pedido.etiqueta_url }}" target="_blank" class="btn btn-sm btn-success">📄 Descargar etiqueta</a></p>
+            {% endif %}
+            {% if pedido.estado_envio %}
+            <p class="mb-0"><strong>Estado:</strong> <span class="text-dark">{{ pedido.estado_envio|title }}</span></p>
+            {% endif %}
+          </div>
+          {% else %}
+          <div class="mt-2 p-3 border border-info rounded" style="background-color: #d1ecf1; border-color: #bee5eb;">
+            <p class="mb-0 text-info"><strong>🕒 El envío se generará en las próximas horas.</strong></p>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if pedido.retiro_en_tienda %}
+        <div class="mt-3 p-3 border border-success rounded" style="background-color: #d4edda; border-color: #c3e6cb;">
+          <h6 class="text-success mb-2">🏪 Información de retiro:</h6>
+          <p class="mb-1"><strong>Dirección:</strong> <span class="text-dark">Diez de Julio 525, Santiago Centro</span></p>
+          <p class="mb-1"><strong>Horario:</strong> <span class="text-dark">Lunes a Viernes 9:00 - 18:00</span></p>
+          <p class="mb-0"><strong>Teléfono:</strong> <span class="text-dark">+56 9 1234 5678</span></p>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if productos %}
+      <div class="card shadow-sm p-4 mb-4">
+        <h5 class="mb-3">🛒 Productos Comprados</h5>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th width="80">Imagen</th>
+                <th>Producto</th>
+                <th width="100">Precio Unit.</th>
+                <th width="80">Cantidad</th>
+                <th width="120">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in productos %}
+                <tr>
+                  <td>
+                    {% if item.imagen %}
+                      <img src="{{ item.imagen.url }}" alt="{{ item.producto }}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                    {% else %}
+                      <div class="bg-light d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; border-radius: 8px;">
+                        <i class="fas fa-image text-muted"></i>
+                      </div>
+                    {% endif %}
+                  </td>
+                  <td class="align-middle">
+                    <strong>{{ item.producto }}</strong>
+                  </td>
+                  <td class="align-middle">
+                    <span class="text-success fw-bold">${{ item.precio|floatformat:0|intcomma}}</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <span class="badge bg-primary">{{ item.cantidad }}</span>
+                  </td>
+                  <td class="align-middle">
+                    <span class="text-success fw-bold">${{ item.subtotal|floatformat:0|intcomma}}</span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot class="table-light">
+              <tr>
+                <td colspan="4" class="text-end fw-bold">Total del pedido:</td>
+                <td class="fw-bold text-success fs-5">${{ monto|floatformat:0|intcomma}}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+      
+      <!-- Mensaje de respaldo si no hay productos -->
+      {% if not productos %}
+      <div class="card shadow-sm p-4 mb-4">
+        <div class="alert alert-info">
+          <h6 class="mb-2">ℹ️ Información del Pedido</h6>
+          <p class="mb-0">Los detalles específicos de los productos se están procesando. Si necesitas más información sobre tu pedido, puedes contactarnos con el ID de orden: <strong>{{ order_id }}</strong></p>
+        </div>
+      </div>
+      {% endif %}
+      
+      <!-- 🆕 SECCIÓN DE FACTURACIÓN -->
+      {% if factura_generada %}
+      <div class="card shadow-sm p-4 mb-4 border-success">
+        <h5 class="mb-3 text-success">📄 Factura Electrónica</h5>
+        <div class="alert alert-success">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h6 class="mb-2">✅ Factura generada exitosamente</h6>
+              <p class="mb-1">Tu factura electrónica ha sido enviada a: <strong>{{ email }}</strong></p>
+              <p class="mb-0 text-muted">La factura es válida ante el SII y puede ser utilizada para fines tributarios.</p>
+            </div>
+            <div class="col-md-4 text-end">
+              {% if pdf_factura_url %}
+              <a href="{{ pdf_factura_url }}" target="_blank" class="btn btn-success">
+                <i class="fas fa-download"></i> Descargar PDF
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        
+        <!-- Información adicional de la factura -->
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <small class="text-muted">
+              <i class="fas fa-info-circle"></i> 
+              La factura ha sido enviada automáticamente al SII chileno
+            </small>
+          </div>
+          <div class="col-md-6 text-end">
+            <small class="text-muted">
+              <i class="fas fa-shield-alt"></i> 
+              Documento electrónico válido
+            </small>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="card shadow-sm p-4 mb-4 border-warning">
+        <h5 class="mb-3 text-warning">📄 Comprobante de Compra</h5>
+        <div class="alert alert-warning">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h6 class="mb-2">⏳ Procesando facturación</h6>
+              <p class="mb-1">Tu comprobante de compra se está generando</p>
+              <p class="mb-0 text-muted">Recibirás la factura por email en los próximos minutos.</p>
+            </div>
+            <div class="col-md-4 text-end">
+              <button type="button" class="btn btn-outline-warning" onclick="consultarEstadoFactura('{{ order_id }}')">
+                <i class="fas fa-sync"></i> Verificar Estado
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      
+      <a href="/" class="btn btn-eliminar">Volver al inicio</a>
+    </div>
+  </main>
+  {% include 'base/footer.html' %}
+</body>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const montoSpan = document.getElementById("montoTotal");
+    if (montoSpan) {
+      const valor = parseInt(montoSpan.textContent.replace(/\D/g, '')) || 0;
+      montoSpan.textContent = valor.toLocaleString("es-CL", {
+        style: "currency",
+        currency: "CLP",
+        minimumFractionDigits: 0
+      });
+    }
+  });
+
+  // 🆕 Función para consultar estado de factura
+  async function consultarEstadoFactura(orderId) {
+    try {
+      const button = event.target;
+      const originalText = button.innerHTML;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Consultando...';
+      button.disabled = true;
+
+      const response = await fetch(`/api/factura/estado/${orderId}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Actualizar la interfaz con la información de la factura
+        if (data.factura && data.factura.pdf_url) {
+          // Recargar la página para mostrar la factura actualizada
+          window.location.reload();
+        } else {
+          alert('La factura aún se está procesando. Intenta nuevamente en unos minutos.');
+        }
+      } else {
+        alert(`Error: ${data.error || 'No se pudo consultar el estado'}`);
+      }
+    } catch (error) {
+      console.error('Error consultando estado de factura:', error);
+      alert('Error de conexión. Intenta nuevamente.');
+    } finally {
+      const button = event.target;
+      if (button) {
+        button.innerHTML = '<i class="fas fa-sync"></i> Verificar Estado';
+        button.disabled = false;
+      }
+    }
+  }
+
+  // Auto-verificar estado de factura cada 30 segundos si no está generada
+  {% if not factura_generada %}
+  setInterval(() => {
+    consultarEstadoFactura('{{ order_id }}');
+  }, 30000); // 30 segundos
+  {% endif %}
+</script>
+
+</html>

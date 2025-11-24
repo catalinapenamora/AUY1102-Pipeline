@@ -1,0 +1,597 @@
+/* Catálogo de Productos - Estilos personalizados */
+
+/* Variables de colores de la empresa */
+:root {
+    --color-primary: #007bff;
+    --color-secondary: #6c757d;
+    --color-success: #28a745;
+    --color-danger: #dc3545;
+    --color-warning: #ffc107;
+    --color-info: #17a2b8;
+    --color-light: #f8f9fa;
+    --color-dark: #343a40;
+    --empresa-azul: #1e3a8a;
+    --empresa-azul-claro: #3b82f6;
+    --empresa-gris: #64748b;
+    --empresa-gris-claro: #f1f5f9;
+}
+
+/* Tarjetas de productos */
+.fruite-item {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 100%; /* Asegurar altura consistente */
+    display: flex;
+    flex-direction: column;
+    width: 100%; /* Asegurar ancho consistente */
+}
+
+.fruite-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Imagen del producto - altura fija para uniformidad */
+.fruite-img {
+    height: 220px;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+    width: 100%;
+    position: relative;
+}
+
+.fruite-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.3s ease;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.fruite-item:hover .fruite-img img {
+    transform: scale(1.05);
+}
+
+/* Contenido de la card - flex para distribución uniforme */
+.fruite-item .p-4 {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px; /* Altura mínima para el contenido */
+    padding: 1.5rem !important; /* Padding uniforme */
+    box-sizing: border-box;
+}
+
+/* Título del producto - altura fija */
+.fruite-item h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.3;
+    min-height: 3.25rem; /* Espacio para 2-3 líneas */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+}
+
+/* Descripción del producto - altura fija */
+.fruite-item p {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 16px;
+    flex-grow: 1;
+    min-height: 2.8rem; /* Espacio para 2 líneas */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #64748b;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+}
+
+/* Área de precio - siempre al final */
+.fruite-item .d-flex {
+    margin-top: auto;
+}
+
+/* Wrapper para mantener cards del mismo tamaño */
+.product-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%; /* Asegurar ancho uniforme */
+}
+
+.product-card-wrapper a {
+    flex: 1;
+    display: flex !important;
+    width: 100%; /* Asegurar que el enlace ocupe todo el ancho */
+}
+
+.product-card-wrapper button {
+    margin-top: auto;
+    flex-shrink: 0;
+    width: 100%; /* Botón ocupa todo el ancho */
+}
+
+/* Forzar que todas las columnas tengan el mismo ancho - 3 por fila */
+.col-md-6.col-lg-6.col-xl-4 {
+    flex: 0 0 33.333333%; /* Exactamente 3 por fila */
+    max-width: 33.333333%;
+    min-height: 500px; /* Altura mínima consistente */
+    padding: 0 0.75rem; /* Espaciado uniforme */
+    margin-bottom: 1.5rem; /* Espacio entre filas */
+}
+
+/* Contenedor de productos con flexbox controlado - 3 cards por fila */
+#productos-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0; /* Sin gap para usar padding de las columnas */
+    justify-content: flex-start;
+    align-items: stretch;
+    margin: 0 -0.75rem; /* Compensar padding de las columnas */
+}
+
+/* Asegurar que todas las cards tengan el mismo tamaño base - 3 por fila */
+#productos-container > .col-md-6 {
+    display: flex;
+    align-items: stretch;
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+}
+
+/* Reset de márgenes y paddings para consistencia total */
+.fruite-item .p-4 {
+    padding: 1.5rem !important; /* Padding uniforme */
+    box-sizing: border-box;
+}
+
+/* Eliminar cualquier margen irregular */
+.fruite-item h4,
+.fruite-item p {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+}
+
+/* Asegurar que el badge de categoría no afecte el ancho */
+.text-white.bg-secondary {
+    position: absolute;
+    z-index: 10;
+    white-space: nowrap;
+    max-width: calc(100% - 20px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Asegurar que el badge de categoría no afecte el ancho */
+.text-white.bg-secondary {
+    position: absolute;
+    z-index: 10;
+    white-space: nowrap;
+    max-width: calc(100% - 20px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Responsivo */
+@media (max-width: 1200px) {
+    .fruite-img {
+        height: 200px;
+    }
+    
+    .fruite-item .p-4 {
+        min-height: 180px;
+    }
+    
+    .fruite-item h4 {
+        font-size: 1rem;
+        min-height: 3rem;
+    }
+    
+    .fruite-item p {
+        font-size: 0.85rem;
+        min-height: 2.55rem;
+    }
+    
+    /* Mantener 3 por fila en pantallas medianas */
+    .col-md-6.col-lg-6.col-xl-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+    
+    #productos-container > .col-md-6 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+}
+
+@media (max-width: 768px) {
+    .fruite-img {
+        height: 180px;
+    }
+    
+    .fruite-item .p-4 {
+        min-height: 160px;
+        padding: 1rem !important;
+    }
+    
+    .fruite-item h4 {
+        font-size: 0.95rem;
+        min-height: 2.85rem;
+    }
+    
+    .fruite-item p {
+        font-size: 0.8rem;
+        min-height: 2.4rem;
+    }
+    
+    .price-info small {
+        font-size: 0.75rem;
+    }
+    
+    .fruite-item {
+        margin-bottom: 1rem;
+    }
+    
+    /* 2 por fila en tablets */
+    .col-md-6.col-lg-6.col-xl-4 {
+        flex: 0 0 50%;
+        max-width: 50%;
+        min-height: 450px;
+    }
+    
+    #productos-container > .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 576px) {
+    .fruite-img {
+        height: 160px;
+    }
+    
+    .fruite-item .p-4 {
+        min-height: 140px;
+        padding: 0.75rem !important;
+    }
+    
+    .fruite-item h4 {
+        font-size: 0.9rem;
+        min-height: 2.7rem;
+    }
+    
+    .fruite-item p {
+        font-size: 0.75rem;
+        min-height: 2.25rem;
+    }
+    
+    .text-white.bg-secondary {
+        font-size: 0.7rem;
+        padding: 2px 8px !important;
+    }
+    
+    /* 1 por fila en móviles */
+    .col-md-6.col-lg-6.col-xl-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        min-height: 400px;
+    }
+    
+    #productos-container > .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    
+    #productos-container {
+        margin: 0;
+    }
+    
+    .col-md-6.col-lg-6.col-xl-4 {
+        padding: 0 0.5rem;
+    }
+}
+
+/* Notificaciones */
+.alert {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    border-color: var(--color-success);
+    color: var(--color-success);
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+/* ===== AJUSTES DE LAYOUT PARA HEADER FIJO ===== */
+
+/* Espaciado principal del catálogo */
+.container-fluid.fruite {
+    margin-top: 0;
+    padding-top: 120px !important; /* Espacio para el header fijo */
+    min-height: calc(100vh - 120px); /* Altura mínima */
+}
+
+/* Título del catálogo */
+.container-fluid.fruite h1 {
+    margin-top: 0;
+    padding-top: 20px;
+    color: var(--empresa-azul);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Ajustes responsive para el header */
+@media (max-width: 992px) {
+    .container-fluid.fruite {
+        padding-top: 100px !important; /* Menor espaciado en tablets */
+    }
+}
+
+@media (max-width: 768px) {
+    .container-fluid.fruite {
+        padding-top: 90px !important; /* Menor espaciado en móviles */
+    }
+    
+    .container-fluid.fruite h1 {
+        font-size: 1.8rem;
+        padding-top: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid.fruite {
+        padding-top: 80px !important; /* Menor espaciado en móviles pequeños */
+    }
+    
+    .container-fluid.fruite h1 {
+        font-size: 1.6rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Mejoras en la sidebar de categorías */
+.col-lg-3 {
+    position: sticky;
+    top: 140px; /* Se mantiene visible al hacer scroll */
+    height: fit-content;
+    z-index: 100;
+}
+
+@media (max-width: 992px) {
+    .col-lg-3 {
+        position: static; /* En tablets y móviles no usar sticky */
+        top: auto;
+    }
+}
+
+/* Espaciado mejorado entre secciones */
+.row.g-4 {
+    margin-top: 10px;
+}
+
+/* Mejoras en el selector de ordenar */
+.row.justify-content-end {
+    margin-bottom: 20px;
+}
+
+.form-select {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus {
+    border-color: var(--empresa-azul);
+    box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.25);
+    outline: none;
+}
+
+/* ===== ESTILOS PARA ELEMENTOS SEMÁNTICOS ===== */
+
+/* Header de la página */
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.page-header h1 {
+    color: var(--empresa-azul);
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0.5rem;
+}
+
+/* Sidebar de categorías */
+.sidebar-categories {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.categories-title {
+    color: var(--empresa-azul);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--empresa-azul-claro);
+    text-align: center;
+}
+
+/* Sección de productos */
+.products-section {
+    padding-left: 2rem;
+}
+
+@media (max-width: 992px) {
+    .products-section {
+        padding-left: 0;
+        margin-top: 2rem;
+    }
+    
+    .sidebar-categories {
+        margin-bottom: 2rem;
+    }
+}
+
+/* Mejoras en las etiquetas de formulario */
+.form-label {
+    font-weight: 600;
+    color: var(--empresa-azul);
+    margin-bottom: 0.5rem;
+}
+
+/* Contenido principal del catálogo */
+.catalog-main {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mejoras en la accesibilidad */
+.sidebar-categories:focus-within,
+.products-section:focus-within {
+    outline: 2px solid var(--empresa-azul-claro);
+    outline-offset: 2px;
+}
+
+/* Indicador visual de scroll en categorías */
+.sidebar-categories::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--empresa-azul), var(--empresa-azul-claro));
+    border-radius: 12px 12px 0 0;
+}
+
+/* ===== ESTILOS ADICIONALES PARA MEJORAR UX ===== */
+
+/* Quitar outline azul del focus en contenedores y botones */
+#productos-container:focus,
+#productos-container *:focus,
+.product-card-wrapper:focus,
+.fruite-item:focus,
+button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Mejorar el focus visual solo en botones interactivos */
+.btn:focus {
+    outline: 2px solid var(--empresa-azul-claro) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+
+.btn:focus:not(:focus-visible) {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Focus mejorado para enlaces de productos */
+.product-card-wrapper a:focus {
+    outline: 2px solid var(--empresa-azul-claro);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+.product-card-wrapper a:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Quitar focus outline de divs y contenedores */
+div:focus {
+    outline: none !important;
+}
+
+/* Estilos mejorados para notificaciones */
+.alert.position-fixed {
+    animation: slideInDown 0.3s ease-out;
+    border: none;
+    font-weight: 600;
+    text-align: center;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mejorar el estilo de la notificación de éxito */
+.alert-success.position-fixed {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: 1px solid #047857;
+}
+
+/* Mejorar el estilo de la notificación de error */
+.alert-danger.position-fixed {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: 1px solid #b91c1c;
+}
+
+/* Prevenir selección de texto en botones y cards */
+.btn,
+.product-card-wrapper,
+.fruite-item {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Permitir selección de texto en títulos y descripciones */
+.fruite-item h4,
+.fruite-item p {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}

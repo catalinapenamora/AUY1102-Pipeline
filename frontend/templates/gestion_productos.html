@@ -1,0 +1,1900 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Gestión de Productos | AutoParts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'img/favicon.ico.png' %}" type="image/x-icon">
+
+    <!-- Tipografías y Estilos -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <link href="{% static 'css/catalogo.css' %}" rel="stylesheet">
+
+    {% include "base/header.html" %}
+
+    <style>
+        :root {
+            --empresa-rojo: #780000;
+            --empresa-rojo-claro: #a01c1c;
+            --empresa-gris: #64748b;
+            --empresa-gris-claro: #f1f5f9;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        /* Centrar todo el contenido principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, var(--empresa-rojo), var(--empresa-rojo-claro));
+            color: white;
+            padding: 2rem 0;
+            margin-top: 120px;
+            box-shadow: 0 4px 12px rgba(120, 0, 0, 0.2);
+            text-align: center; /* Centrar contenido del header */
+        }
+
+        .admin-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            display: inline-block; /* Mantener inline-block para centrado */
+        }
+
+        .gestion-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .form-section {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            padding: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .form-title {
+            color: var(--empresa-rojo);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centrar título del formulario */
+            gap: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--empresa-rojo-claro);
+            box-shadow: 0 0 0 0.2rem rgba(160, 28, 28, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--empresa-rojo), var(--empresa-rojo-claro));
+            border: none;
+            padding: 12px 24px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #6b0000, #8b0000);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(120, 0, 0, 0.4);
+        }
+
+        .table-container {
+            padding: 2rem;
+        }
+
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, var(--empresa-rojo), var(--empresa-rojo-claro));
+            color: white;
+            border: none;
+            padding: 16px 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        .table tbody td {
+            padding: 16px 12px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .product-thumbnail {
+            max-height: 50px;
+            max-width: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: var(--empresa-rojo);
+        }
+
+        .product-description {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--empresa-gris);
+        }
+
+        .product-price, .product-price-wholesale {
+            font-weight: 700;
+            color: #059669;
+        }
+
+        .product-stock {
+            font-weight: 600;
+        }
+
+        .product-actions {
+            white-space: nowrap;
+        }
+
+        .btn-outline-primary {
+            border-color: var(--empresa-rojo-claro);
+            color: var(--empresa-rojo-claro);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--empresa-rojo-claro);
+            border-color: var(--empresa-rojo-claro);
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .alert-custom {
+            border-radius: 12px;
+            border: none;
+            padding: 16px 20px;
+            font-weight: 500;
+        }
+
+        .stats-cards {
+            margin: 2rem 0;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .stats-cards .row {
+            justify-content: center !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 1rem; /* Espacio consistente entre tarjetas */
+        }
+
+        .stats-cards .col-12 {
+            flex: 0 0 auto; /* No expandir */
+            width: auto; /* Ancho automático */
+            max-width: 280px; /* Ancho máximo de tarjeta */
+        }
+
+        /* Responsividad para estadísticas */
+        @media (max-width: 768px) {
+            .stats-cards .row {
+                justify-content: center !important;
+            }
+            
+            .stats-cards .col-12 {
+                max-width: 100%;
+                flex: 0 0 100%;
+            }
+            
+            .stat-card {
+                max-width: 300px;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 991px) {
+            .stats-cards .col-12 {
+                max-width: calc(50% - 1rem);
+                flex: 0 0 calc(50% - 1rem);
+            }
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            width: 100%;
+            max-width: 280px;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.3s ease;
+            margin: 0 auto; /* Centrar la tarjeta dentro de su columna */
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.products {
+            background: linear-gradient(135deg, var(--empresa-rojo), var(--empresa-rojo-claro));
+            color: white;
+        }
+
+        .stat-icon.categories {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .stat-icon.stock {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--empresa-rojo);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--empresa-gris);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        /* Estilos para paginación administrativa */
+        #admin-pagination-container {
+            margin: 30px 0;
+        }
+        
+        .pagination {
+            --bs-pagination-color: var(--empresa-rojo);
+            --bs-pagination-hover-color: #ffffff;
+            --bs-pagination-hover-bg: var(--empresa-rojo);
+            --bs-pagination-active-bg: var(--empresa-rojo);
+            --bs-pagination-active-border-color: var(--empresa-rojo);
+            --bs-pagination-border-color: #dee2e6;
+            gap: 4px;
+            margin-bottom: 0;
+        }
+        
+        .pagination .page-item {
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .pagination .page-link {
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            color: var(--empresa-rojo);
+            padding: 8px 12px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+            min-width: 40px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: var(--empresa-rojo);
+            border-color: var(--empresa-rojo);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(120, 0, 0, 0.3);
+        }
+        
+        .pagination .page-link:hover:not(.disabled) {
+            background-color: var(--empresa-rojo);
+            border-color: var(--empresa-rojo);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(120, 0, 0, 0.2);
+        }
+        
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        /* Contador de productos administrativo */
+        #admin-product-count {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        #admin-product-count small {
+            margin: 0;
+            padding: 8px 16px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            display: inline-block;
+        }
+
+        /* Modal de eliminación personalizado */
+        .modal-content {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: none;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c82333, #bd2130);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-outline-secondary {
+            border-width: 2px;
+            font-weight: 600;
+            padding: 10px 20px;
+        }
+
+        /* Animación para el ícono de eliminación */
+        .modal.show .fa-trash-alt {
+            animation: trashShake 0.6s ease-in-out;
+        }
+
+        @keyframes trashShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        /* Efecto de fade out para filas que se están eliminando */
+        .fade-out-row {
+            opacity: 0.3;
+            transform: scale(0.98);
+            transition: all 0.5s ease;
+            background-color: #fee !important;
+        }
+
+        /* Efecto de highlight para fila recién agregada/editada */
+        .highlight-row {
+            background-color: #d4edda !important;
+            animation: highlightFade 3s ease-out;
+        }
+
+        @keyframes highlightFade {
+            0% { background-color: #d4edda; }
+            100% { background-color: transparent; }
+        }
+
+        /* Estilos para compatibilidad de vehículos */
+        .compatibility-section {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            background: white;
+        }
+
+        .compatibility-form {
+            border: 1px solid #dee2e6;
+        }
+
+        .compatibility-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .compatibility-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .compatibility-item:hover {
+            background: #e9ecef;
+            border-color: var(--empresa-rojo-claro);
+        }
+
+        .compatibility-info {
+            flex: 1;
+        }
+
+        .compatibility-details {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .btn-remove-compatibility {
+            background: #dc3545;
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-remove-compatibility:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        .compatibility-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: #1565c0;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid #90caf9;
+        }
+
+        .compatibility-tag .btn-close {
+            font-size: 0.6rem;
+            color: #1565c0;
+            margin-left: 6px;
+            opacity: 0.7;
+        }
+
+        .compatibility-tag .btn-close:hover {
+            opacity: 1;
+            color: #d32f2f;
+        }
+
+        .card-header.bg-primary {
+            background: linear-gradient(135deg, var(--empresa-rojo), var(--empresa-rojo-claro)) !important;
+        }
+
+        #lista-compatibilidades {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .compatibility-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .compatibility-item:hover {
+            background: #f5f5f5;
+            border-color: var(--empresa-rojo-claro);
+        }
+
+        .compatibility-info {
+            flex-grow: 1;
+        }
+
+        .compatibility-vehicle {
+            font-weight: 600;
+            color: var(--empresa-rojo);
+            margin-bottom: 2px;
+        }
+
+        .compatibility-years {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .compatibility-notes {
+            font-size: 0.8rem;
+            color: #888;
+            font-style: italic;
+        }
+
+        .btn-remove-compatibility {
+            background: none;
+            border: none;
+            color: #dc3545;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-remove-compatibility:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+            
+            .product-description {
+                max-width: 150px;
+            }
+            
+            .form-section {
+                padding: 1.5rem 1rem;
+            }
+            
+            .table-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header administrativo -->
+    <div class="admin-header">
+        <div class="container">
+            <div class="admin-badge">
+                <i class="fas fa-cog me-2"></i>Panel Administrativo
+            </div>
+            <h1 class="mb-0 " style="color: #ffffff;">
+                <i class="fas fa-boxes me-3" style="color: #ffffff;"></i>Gestión de Productos
+            </h1>
+            <p class="mb-0 mt-2 opacity-75">Administra el inventario y catálogo de AutoParts</p>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="container stats-cards">
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-6 col-md-4 col-xl-3 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon products">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="stat-number" id="total-productos">-</div>
+                    <div class="stat-label">Total Productos</div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-xl-3 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon categories">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="stat-number">{{ categorias.count }}</div>
+                    <div class="stat-label">Categorías</div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-xl-3 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon stock">
+                        <i class="fas fa-warehouse"></i>
+                    </div>
+                    <div class="stat-number" id="total-stock">-</div>
+                    <div class="stat-label">Stock Total</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="gestion-card">
+                    <!-- Formulario de productos -->
+                    <div class="form-section">
+                        <h3 class="form-title">
+                            <i class="fas fa-plus-circle"></i>
+                            <span id="form-title-text">Agregar Nuevo Producto</span>
+                        </h3>
+
+                        <form id="form-producto" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Nombre del Producto</label>
+                                    <input name="nombre" placeholder="Ej: Batería 12V 55Ah" class="form-control" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label fw-bold">Precio Regular</label>
+                                    <input name="precio" placeholder="29990" type="number" class="form-control" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label fw-bold">Precio Mayorista</label>
+                                    <input name="precio_mayorista" placeholder="25990" type="number" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label fw-bold">Descripción</label>
+                                    <textarea name="descripcion" placeholder="Descripción detallada del producto..." class="form-control" rows="3" required></textarea>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Categoría</label>
+                                    <select name="categoria" class="form-select" required>
+                                        <option value="">Seleccione categoría</option>
+                                        {% for categoria in categorias %}
+                                        <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Sección de Compatibilidad de Vehículos -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="card border-primary">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6 class="mb-0" style="color: #ffffff;">
+                                                <i class="fas fa-car me-2" style="color: #ffffff;"></i>Compatibilidad con Vehículos
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label fw-bold">Marca del Vehículo</label>
+                                                    <select id="marca-vehiculo" class="form-select">
+                                                        <option value="">Seleccione marca</option>
+                                                    </select>
+                                                    <div class="form-check mt-2">
+                                                        <input class="form-check-input" type="checkbox" id="compatibilidad-todas-marcas">
+                                                        <label class="form-check-label" for="compatibilidad-todas-marcas">
+                                                            Todas las marcas y modelos
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label fw-bold">Modelo</label>
+                                                    <select id="modelo-vehiculo" class="form-select" disabled>
+                                                        <option value="">Seleccione modelo</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="form-label fw-bold">Año Desde</label>
+                                                    <input id="año-desde" type="number" class="form-control" min="1980" max="2030" placeholder="2020">
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="form-label fw-bold">Año Hasta</label>
+                                                    <input id="año-hasta" type="number" class="form-control" min="1980" max="2030" placeholder="2025">
+                                                </div>
+                                                <div class="col-md-2 mb-3 d-flex align-items-end">
+                                                    <button type="button" id="btn-agregar-compatibilidad" class="btn btn-outline-primary w-100">
+                                                        <i class="fas fa-plus me-1"></i> Agregar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <label class="form-label fw-bold">Notas de Compatibilidad</label>
+                                                    <textarea id="notas-compatibilidad" class="form-control" rows="2" placeholder="Notas adicionales sobre la compatibilidad (opcional)"></textarea>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Lista de compatibilidades -->
+                                            <div class="mt-3">
+                                                <h6 class="text-muted mb-2">Vehículos Compatibles:</h6>
+                                                <div id="lista-compatibilidades" class="border rounded p-2 bg-light" style="min-height: 60px;">
+                                                    <small class="text-muted">No hay compatibilidades agregadas</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label fw-bold">Stock</label>
+                                    <input name="stock" placeholder="50" type="number" class="form-control" required>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label fw-bold">Peso (kg)</label>
+                                    <input name="peso" placeholder="2.5" type="number" step="0.01" class="form-control" required>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label fw-bold">Largo (cm)</label>
+                                    <input name="largo" placeholder="25" type="number" class="form-control" min='1' required>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label fw-bold">Ancho (cm)</label>
+                                    <input name="ancho" placeholder="15" type="number" class="form-control" min='1' required>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label fw-bold">Alto (cm)</label>
+                                    <input name="alto" placeholder="20" type="number" class="form-control" min='1' required>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label fw-bold">Imagen</label>
+                                    <input name="imagen" type="file" class="form-control" accept="image/*">
+                                </div>
+                            </div>
+
+                            <div class="text-center"> <!-- Cambiar a text-center para centrar botones -->
+                                <button type="button" class="btn btn-outline-secondary me-2" onclick="limpiarFormulario()">
+                                    <i class="fas fa-times me-1"></i> Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> 
+                                    <span id="btn-text">Agregar Producto</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Tabla de productos -->
+                    <div class="table-container">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="flex-grow-1 text-center"> <!-- Centrar el título -->
+                                <h4 class="mb-0 text-primary">
+                                    <i class="fas fa-list me-2"></i>Inventario de Productos
+                                </h4>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="cargarProductos(1)">
+                                <i class="fas fa-sync-alt me-1"></i> Actualizar
+                            </button>
+                        </div>
+
+                        <!-- Contador de productos -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div id="admin-product-count" class="text-center">
+                                    <!-- El contador se actualizará con JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Descripción</th>
+                                        <th>Precio</th>
+                                        <th>P. Mayorista</th>
+                                        <th>Stock</th>
+                                        <th>Peso</th>
+                                        <th>Dimensiones</th>
+                                        <th>Vehículos</th>
+                                        <th>Imagen</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productos-lista">
+                                    <!-- Los productos se cargarán aquí -->
+                                    <tr>
+                                        <td colspan="10" class="text-center py-5">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Cargando...</span>
+                                            </div>
+                                            <p class="mt-2 text-muted">Cargando productos...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginación -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div id="admin-pagination-container" class="d-flex justify-content-center">
+                                    <!-- La paginación se generará con JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar -->
+    <div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white border-0">
+                    <h5 class="modal-title" id="modalEliminarLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Confirmar Eliminación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="text-center mb-3">
+                        <div class="bg-danger bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-trash-alt fa-2x text-danger"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark">¿Estás seguro de eliminar este producto?</h6>
+                        <p class="text-muted mb-0" id="producto-eliminar-nombre">
+                            Esta acción no se puede deshacer.
+                        </p>
+                    </div>
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>El producto será eliminado permanentemente del inventario y catálogo.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn btn-danger" id="btn-confirmar-eliminar">
+                        <i class="fas fa-trash me-1"></i> Eliminar Producto
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include "base/footer.html" %}
+    
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const CSRF_TOKEN = "{{ csrf_token }}";
+        const URL_PRODUCTOS_API = "{% url 'lista-productos-api' %}";
+    </script>
+    <script>
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.startsWith(name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+const token = localStorage.getItem("token");
+
+console.log('Token obtenido:', token); // Debug
+console.log('CSRF Token:', csrftoken); // Debug
+
+if (!token) {
+  console.error('No hay token de autenticación');
+  window.location.href = "/login/";
+}
+
+// Función de test para debug
+function testFunciones() {
+  console.log('=== TEST DE FUNCIONES ===');
+  console.log('mostrarFormularioModificar existe:', typeof mostrarFormularioModificar === 'function');
+  console.log('eliminarProducto existe:', typeof eliminarProducto === 'function');
+  console.log('window.mostrarFormularioModificar existe:', typeof window.mostrarFormularioModificar === 'function');
+  console.log('window.eliminarProducto existe:', typeof window.eliminarProducto === 'function');
+  
+  // Test de estado del usuario
+  fetch('/api/perfil/', {
+    headers: {
+      "Authorization": "Token " + token
+    }
+  })
+  .then(res => {
+    console.log('Status de verificación de perfil:', res.status);
+    if (res.ok) {
+      return res.json();
+    } else {
+      throw new Error(`Error en autenticación: ${res.status}`);
+    }
+  })
+  .then (data => {
+    console.log('=== DATOS DEL USUARIO ===');
+    console.log('Perfil del usuario:', data);
+    console.log('Es staff:', data.is_staff);
+    console.log('Es superuser:', data.is_superuser);
+    console.log('Tiene trabajador:', data.trabajador !== undefined);
+    
+    if (!data.is_staff && !data.trabajador) {
+      console.warn('⚠️ ADVERTENCIA: Usuario no tiene permisos de staff ni trabajador');
+      mostrarNotificacion('Tu cuenta no tiene permisos para gestionar productos. Contacta al administrador.', 'error');
+    }
+    console.log('========================');
+  })
+  .catch(err => {
+    console.error('Error obteniendo perfil:', err);
+    console.warn('⚠️ Token posiblemente inválido o expirado');
+    mostrarNotificacion('Problema de autenticación. Por favor, inicia sesión nuevamente.', 'error');
+  });
+  
+  console.log('========================');
+}
+
+// Variables para paginación
+let currentPage = 1;
+let totalPages = 1;
+const PRODUCTOS_POR_PAGINA = 10; // Mostrar 10 productos por página en admin
+
+// Variables para compatibilidad de vehículos
+let compatibilidadesTemp = []; // Almacenar compatibilidades temporalmente
+let marcasVehiculos = [];
+let modelosVehiculos = [];
+
+function formatearCLP(valor) {
+  return `$${Math.round(valor).toLocaleString('es-CL')}`;
+}
+
+// Funciones para compatibilidad de vehículos con CarAPI
+function cargarMarcasVehiculos() {
+  console.log('🚗 Cargando marcas de vehículos desde CarAPI...');
+  
+  // Verificar que el elemento existe
+  const select = document.getElementById('marca-vehiculo');
+  if (!select) {
+    console.error('❌ Elemento marca-vehiculo no encontrado');
+    return;
+  }
+  
+  // Verificar que el token existe y es válido
+  const currentToken = localStorage.getItem("token");
+  if (!currentToken || currentToken.length < 10) {
+    console.error('❌ Token no válido o no encontrado:', currentToken);
+    mostrarNotificacion('Token de autenticación inválido. Redirigiendo al login...', 'error');
+    setTimeout(() => {
+      window.location.href = "/login/";
+    }, 2000);
+    return;
+  }
+  
+  fetch('/api/marcas-vehiculos/', {
+    headers: {
+      "Authorization": "Token " + currentToken,
+      "Content-Type": "application/json"
+    }
+  })
+  .then(res => {
+    console.log('📡 Respuesta del servidor:', res.status, res.statusText);
+    if (!res.ok) {
+      if (res.status === 401) {
+        console.error('❌ Token expirado o inválido');
+        mostrarNotificacion('Sesión expirada. Redirigiendo al login...', 'error');
+        setTimeout(() => {
+          localStorage.removeItem("token");
+          window.location.href = "/login/";
+        }, 2000);
+        return;
+      }
+      throw new Error(`Error ${res.status}: ${res.statusText}`);
+    }
+    return res.json();
+  })
+  .then(data => {
+    if (!data) {
+      console.warn('⚠️ No se recibieron datos de marcas');
+      return;
+    }
+    
+    console.log('✅ Marcas de vehículos cargadas:', data.length);
+    marcasVehiculos = data;
+    
+    select.innerHTML = '<option value="">Seleccione marca</option>';
+    
+    // Ordenar marcas alfabéticamente
+    data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+    
+    data.forEach(marca => {
+      select.innerHTML += `<option value="${marca.nombre}">${marca.nombre}</option>`;
+    });
+    
+    // Habilitar el select
+    select.disabled = false;
+    console.log('✅ Select poblado con', data.length, 'marcas');
+  })
+  .catch(err => {
+    console.error('❌ Error cargando marcas de vehículos:', err);
+    if (select) {
+      select.innerHTML = '<option value="">Error cargando marcas</option>';
+    }
+    mostrarNotificacion('Error cargando marcas de vehículos. Intenta recargar la página.', 'error');
+  });
+}
+
+function cargarModelosVehiculos(marcaNombre) {
+  console.log('🚙 Cargando modelos para marca:', marcaNombre);
+  
+  if (!marcaNombre) {
+    const modeloSelect = document.getElementById('modelo-vehiculo');
+    modeloSelect.innerHTML = '<option value="">Seleccione modelo</option>';
+    modeloSelect.disabled = true;
+    return;
+  }
+
+  // Mostrar indicador de carga
+  const modeloSelect = document.getElementById('modelo-vehiculo');
+  modeloSelect.innerHTML = '<option value="">Cargando modelos...</option>';
+  modeloSelect.disabled = true;
+
+  fetch(`/api/modelos-vehiculos/?marca=${encodeURIComponent(marcaNombre)}`, {
+    headers: {
+      "Authorization": "Token " + token
+    }
+  })
+  .then(res => {
+    if (!res.ok) {
+      throw new Error(`Error ${res.status}: ${res.statusText}`);
+    }
+    return res.json();
+  })
+  .then(data => {
+    console.log('✅ Modelos cargados:', data.length);
+    modelosVehiculos = data;
+    
+    modeloSelect.innerHTML = '<option value="">Seleccione modelo</option>';
+    
+    // Ordenar modelos alfabéticamente
+    data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+    
+    data.forEach(modelo => {
+      const rangoAnios = modelo.año_inicio && modelo.año_fin 
+        ? ` (${modelo.año_inicio}-${modelo.año_fin})`
+        : '';
+      modeloSelect.innerHTML += `<option value="${modelo.nombre}">${modelo.nombre}${rangoAnios}</option>`;
+    });
+    
+    // Habilitar el select
+    modeloSelect.disabled = false;
+  })
+  .catch(err => {
+    console.error('❌ Error cargando modelos de vehículos:', err);
+    modeloSelect.innerHTML = '<option value="">Error cargando modelos</option>';
+    mostrarNotificacion('Error cargando modelos de vehículos. Intenta seleccionar otra marca.', 'error');
+  });
+}
+
+function agregarCompatibilidad() {
+  const todasMarcas = document.getElementById('compatibilidad-todas-marcas').checked;
+  if (todasMarcas) {
+    // Evita duplicados
+    if (compatibilidadesTemp.some(c => c.todas)) {
+      mostrarNotificacion('Ya agregaste compatibilidad total.', 'error');
+      return;
+    }
+    compatibilidadesTemp = [{ todas: true }];
+    actualizarListaCompatibilidades();
+    mostrarNotificacion('Compatibilidad total agregada', 'success');
+    return;
+  }
+  const marcaNombre = document.getElementById('marca-vehiculo').value;
+  const modeloNombre = document.getElementById('modelo-vehiculo').value;
+  const añoDesde = document.getElementById('año-desde').value;
+  const añoHasta = document.getElementById('año-hasta').value;
+  const notas = document.getElementById('notas-compatibilidad').value;
+
+  console.log('📝 Agregando compatibilidad:', { marcaNombre, modeloNombre, añoDesde, añoHasta, notas });
+
+  if (!marcaNombre || !modeloNombre || !añoDesde || !añoHasta) {
+    mostrarNotificacion('Por favor complete todos los campos obligatorios', 'error');
+    return;
+  }
+
+  if (parseInt(añoDesde) > parseInt(añoHasta)) {
+    mostrarNotificacion('El año de inicio no puede ser mayor al año de fin', 'error');
+    return;
+  }
+
+  // Verificar duplicados basados en marca, modelo y años
+  const existe = compatibilidadesTemp.some(comp => 
+    comp.marca_nombre === marcaNombre && 
+    comp.modelo_nombre === modeloNombre &&
+    comp.año_desde == añoDesde && 
+    comp.año_hasta == añoHasta
+  );
+
+  if (existe) {
+    mostrarNotificacion('Esta compatibilidad ya fue agregada', 'error');
+    return;
+  }
+
+  // Agregar a la lista temporal
+  const compatibilidad = {
+    marca_nombre: marcaNombre,
+    modelo_nombre: modeloNombre,
+    año_desde: parseInt(añoDesde),
+    año_hasta: parseInt(añoHasta),
+    notas: notas || null
+  };
+
+  compatibilidadesTemp.push(compatibilidad);
+  actualizarListaCompatibilidades();
+  limpiarFormularioCompatibilidad();
+  mostrarNotificacion('Compatibilidad agregada correctamente', 'success');
+}
+
+function eliminarCompatibilidad(index) {
+  if (index >= 0 && index < compatibilidadesTemp.length) {
+    const comp = compatibilidadesTemp[index];
+    console.log('🗑️ Eliminando compatibilidad:', comp);
+    
+    compatibilidadesTemp.splice(index, 1);
+    actualizarListaCompatibilidades();
+    mostrarNotificacion('Compatibilidad eliminada', 'success');
+  }
+}
+
+function actualizarListaCompatibilidades() {
+  const container = document.getElementById('lista-compatibilidades');
+  
+  if (compatibilidadesTemp.length === 0) {
+    container.innerHTML = '<small class="text-muted">No hay compatibilidades agregadas</small>';
+    return;
+  }
+  if (compatibilidadesTemp.length === 1 && compatibilidadesTemp[0].todas) {
+    container.innerHTML = `
+        <div class="compatibility-item">
+          <div class="compatibility-info">
+            <strong class="text-success">Compatible con todas las marcas y modelos</strong>
+          </div>
+          <button type="button" class="btn-remove-compatibility" onclick="eliminarCompatibilidad(0)" title="Eliminar compatibilidad total">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      `;
+    return;
+  }
+  let html = '';
+  compatibilidadesTemp.forEach((comp, index) => {
+      html += `
+        <div class="compatibility-item">
+          <div class="compatibility-info">
+            <div class="compatibility-vehicle">${comp.marca_nombre} ${comp.modelo_nombre}</div>
+            <div class="compatibility-years">Años: ${comp.año_desde} - ${comp.año_hasta}</div>
+            ${comp.notas ? `<div class="compatibility-notes">${comp.notas}</div>` : ''}
+          </div>
+          <button type="button" class="btn-remove-compatibility" onclick="eliminarCompatibilidad(${index})" title="Eliminar compatibilidad">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      `;
+  });
+
+  container.innerHTML = html;
+}
+
+function limpiarFormularioCompatibilidad() {
+  document.getElementById('marca-vehiculo').value = '';
+  document.getElementById('modelo-vehiculo').innerHTML = '<option value="">Seleccione modelo</option>';
+  document.getElementById('modelo-vehiculo').disabled = true;
+  document.getElementById('año-desde').value = '';
+  document.getElementById('año-hasta').value = '';
+  document.getElementById('notas-compatibilidad').value = '';
+}
+
+function cargarProductos(page = 1) {
+  // Construir URL con paginación
+  const url = `/api/productos/?page=${page}&per_page=${PRODUCTOS_POR_PAGINA}`;
+  
+  fetch(url, {
+    headers: {
+      "Authorization": "Token " + token
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      console.log('Datos completos recibidos:', data); // Debug
+      
+      // Manejar el formato paginado de la API
+      const productos = data.productos || data; // Compatibilidad con ambos formatos
+      const pagination = data.pagination;
+      
+      console.log('Productos procesados:', productos); // Debug
+      console.log('Paginación:', pagination); // Debug
+      
+      const tbody = document.getElementById("productos-lista");
+      tbody.innerHTML = '';
+      
+      if (!productos || productos.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" class="text-center py-4">
+              <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+              <p class="text-muted">No hay productos registrados</p>
+            </td>
+          </tr>
+        `;
+        updatePagination(null);
+        return;
+      }
+      
+      productos.forEach(p => {
+        // Formatear compatibilidades
+        let compatibilidadesHtml = '<span class="text-muted">Sin compatibilidades</span>';
+        if (p.compatibilidades && p.compatibilidades.length > 0) {
+          // Mostrar compatibilidad total si existe
+          if (p.compatibilidades.length === 1 && p.compatibilidades[0].todas) {
+            compatibilidadesHtml = '<span class="compatibility-tag bg-success text-white">Todas las marcas y modelos</span>';
+          } else {
+            compatibilidadesHtml = p.compatibilidades.slice(0, 2).map(comp => 
+              `<span class="compatibility-tag">${comp.marca_nombre} ${comp.modelo_nombre}</span>`
+            ).join('');
+            if (p.compatibilidades.length > 2) {
+              compatibilidadesHtml += `<span class="compatibility-tag">+${p.compatibilidades.length - 2} más</span>`;
+            }
+          }
+        }
+        
+        const fila = `
+          <tr>
+            <td class="product-name">${p.nombre}</td>
+            <td class="product-description">${p.descripcion}</td>
+            <td class="product-price">${formatearCLP(p.precio)}</td>
+            <td class="product-price-wholesale">${formatearCLP(p.precio_mayorista)}</td>
+            <td class="product-stock">${p.stock}</td>
+            <td class="product-weight">${p.peso} kg</td>
+            <td class="product-dimensions">${p.largo} × ${p.ancho} × ${p.alto} cm</td>
+            <td class="product-compatibility">${compatibilidadesHtml}</td>
+            <td class="product-image">
+              ${p.imagen ? `<img src="${p.imagen}" alt="${p.nombre}" class="product-thumbnail">` : '<span class="text-muted">Sin imagen</span>'}
+            </td>
+            <td class="product-actions">
+              <button class="btn btn-outline-danger btn-sm me-1" onclick="mostrarFormularioModificar(${p.id})" title="Editar producto ${p.nombre}">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-outline-primary btn-sm" onclick="eliminarProducto(${p.id})" title="Eliminar producto ${p.nombre}" style="color: #dc3545;">
+                <i class="fas fa-trash" style="color: #dc3545;"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+        tbody.innerHTML += fila;
+      });
+
+      // Actualizar paginación
+      if (pagination) {
+        totalPages = pagination.total_pages;
+        currentPage = pagination.current_page;
+        updatePagination(pagination);
+        updateProductCount(pagination);
+      }
+    })
+    .catch(err => {
+      console.error("Error cargando productos:", err);
+      const tbody = document.getElementById("productos-lista");
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="9" class="text-center py-4 text-danger">
+            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+            <p>Error al cargar productos. Por favor, recarga la página.</p>
+          </td>
+        </tr>
+      `;
+    });
+}
+
+// Función para actualizar la paginación
+function updatePagination(pagination) {
+  const paginationContainer = document.getElementById("admin-pagination-container");
+  if (!pagination || pagination.total_pages <= 1) {
+    paginationContainer.innerHTML = '';
+    return;
+  }
+  const { current_page, total_pages, has_previous, has_next } = pagination;
+  let paginationHTML = '<nav aria-label="Paginación de productos administrativos"><ul class="pagination justify-content-center">';
+  // Botón "Anterior"
+  if (has_previous) {
+    paginationHTML += `
+      <li class="page-item">
+        <a class="page-link" href="#" onclick="return cambiarPagina(${current_page - 1}, event);" aria-label="Anterior">&laquo;</a>
+      </li>
+    `;
+  } else {
+    paginationHTML += `
+      <li class="page-item disabled">
+        <span class="page-link">&laquo;</span>
+      </li>
+    `;
+  }
+  // Números de página
+  const startPage = Math.max(1, current_page - 2);
+  const endPage = Math.min(total_pages, current_page + 2);
+  if (startPage > 1) {
+    paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="return cambiarPagina(1, event);">1</a></li>`;
+    if (startPage > 2) {
+      paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+    }
+  }
+  for (let i = startPage; i <= endPage; i++) {
+    if (i === current_page) {
+      paginationHTML += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+    } else {
+      paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="return cambiarPagina(${i}, event);">${i}</a></li>`;
+    }
+  }
+  if (endPage < total_pages) {
+    if (endPage < total_pages - 1) {
+      paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+    }
+    paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="return cambiarPagina(${total_pages}, event);">${total_pages}</a></li>`;
+  }
+  // Botón "Siguiente"
+  if (has_next) {
+    paginationHTML += `
+      <li class="page-item">
+        <a class="page-link" href="#" onclick="return cambiarPagina(${current_page + 1}, event);" aria-label="Siguiente">&raquo;</a>
+      </li>
+    `;
+  } else {
+    paginationHTML += `
+      <li class="page-item disabled">
+        <span class="page-link">&raquo;</span>
+      </li>
+    `;
+  }
+  paginationHTML += '</ul></nav>';
+  paginationContainer.innerHTML = paginationHTML;
+}
+
+function cambiarPagina(num, event) {
+  if (event) event.preventDefault();
+  cargarProductos(num);
+  return false;
+}
+
+// Función para actualizar el contador de productos
+function updateProductCount(pagination) {
+  const countContainer = document.getElementById("admin-product-count");
+  if (countContainer && pagination) {
+    const { current_page, total_items, per_page } = pagination;
+    const startItem = (current_page - 1) * per_page + 1;
+    const endItem = Math.min(current_page * per_page, total_items);
+    
+    countContainer.innerHTML = `
+      <small class="text-muted">
+        Mostrando ${startItem}-${endItem} de ${total_items} productos
+      </small>
+    `;
+  }
+}
+
+function mostrarFormularioModificar(id) {
+  console.log('Intentando editar producto ID:', id);
+  
+  fetch(`/api/productos/${id}/`, {
+    headers: {
+      "Authorization": "Token " + token
+    }
+  })
+    .then(res => {
+      console.log('Respuesta del servidor para editar:', res.status);
+      if (!res.ok) {
+        throw new Error(`Error ${res.status}: No se pudo obtener el producto`);
+      }
+      return res.json();
+    })
+    .then(p => {
+      console.log('Datos del producto recibidos:', p);
+      const form = document.getElementById('form-producto');
+      form.dataset.editId = id;
+      
+      // Cambiar título y botón
+      document.getElementById('form-title-text').textContent = 'Editar Producto';
+      document.getElementById('btn-text').textContent = 'Actualizar Producto';
+      document.querySelector('.form-title i').className = 'fas fa-edit';
+
+      // Llenar campos
+      form.nombre.value = p.nombre || '';
+      form.precio.value = p.precio || '';
+      form.precio_mayorista.value = p.precio_mayorista || '';
+      form.descripcion.value = p.descripcion || '';
+      form.stock.value = p.stock || '';
+      form.categoria.value = p.categoria || ''; 
+      form.peso.value = p.peso || '';
+      form.largo.value = p.largo || '';
+      form.ancho.value = p.ancho || '';
+      form.alto.value = p.alto || '';
+      
+      // Cargar compatibilidades del producto
+      compatibilidadesTemp = [];
+      if (p.compatibilidades && p.compatibilidades.length > 0) {
+        compatibilidadesTemp = p.compatibilidades.map(comp => ({
+          modelo_vehiculo: comp.modelo_vehiculo,
+          año_desde: comp.año_desde,
+          año_hasta: comp.año_hasta,
+          notas: comp.notas || '',
+          marca_nombre: comp.marca_nombre,
+          modelo_nombre: comp.modelo_nombre
+        }));
+      }
+      actualizarListaCompatibilidades();
+      
+      // Scroll al formulario
+      document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+      
+      mostrarNotificacion('Producto cargado para edición', 'success');
+    })
+    .catch(err => {
+      console.error('Error al cargar producto para editar:', err);
+      mostrarNotificacion('Error al cargar el producto para editar: ' + err.message, 'error');
+    });
+}
+
+function limpiarFormulario() {
+  const form = document.getElementById('form-producto');
+  form.reset();
+  delete form.dataset.editId;
+  
+  // Limpiar compatibilidades
+  compatibilidadesTemp = [];
+  actualizarListaCompatibilidades();
+  limpiarFormularioCompatibilidad();
+  
+  // Restaurar título y botón
+  document.getElementById('form-title-text').textContent = 'Agregar Nuevo Producto';
+  document.getElementById('btn-text').textContent = 'Agregar Producto';
+  document.querySelector('.form-title i').className = 'fas fa-plus-circle';
+}
+
+document.getElementById('form-producto').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const form = e.target;
+  const editId = form.dataset.editId;
+  const url = editId ? `/api/productos/${editId}/` : '/api/productos/';
+  const method = editId ? 'PUT' : 'POST';
+
+  const formData = new FormData(form);
+  
+  // Agregar compatibilidades como JSON
+  if (compatibilidadesTemp.length > 0) {
+    formData.append('compatibilidades', JSON.stringify(compatibilidadesTemp));
+  }
+  
+  // Debug: mostrar los datos que se van a enviar
+  console.log('Enviando datos:', Object.fromEntries(formData.entries()));
+  console.log('Compatibilidades:', compatibilidadesTemp);
+
+  // Mostrar indicador de carga
+  const btnSubmit = form.querySelector('button[type="submit"]');
+  const originalText = btnSubmit.innerHTML;
+  btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Guardando...';
+  btnSubmit.disabled = true;
+
+  fetch(url, {
+    method,
+    headers: {
+      'X-CSRFToken': csrftoken,
+      'Authorization': 'Token ' + token
+    },
+    body: formData,
+  })
+  .then(res => {
+    console.log('Respuesta del servidor - Status:', res.status);
+    console.log('Respuesta del servidor - OK:', res.ok);
+    console.log('Respuesta del servidor - Headers:', [...res.headers.entries()]);
+    
+    // Intentar leer la respuesta como texto primero para debugging
+    return res.text().then(text => {
+      console.log('Respuesta del servidor - Texto:', text);
+      
+      // Considerar exitosos todos los códigos de estado 2xx (200-299)
+      if (res.status >= 200 && res.status < 300) {
+        console.log('✅ Operación exitosa - Status:', res.status);
+        try {
+          const result = text ? JSON.parse(text) : {};
+          console.log('Datos parseados:', result);
+          return result;
+        } catch (e) {
+          console.log('Respuesta no es JSON válido, pero status OK. Considerando exitoso.');
+          return { success: true }; // Si no es JSON válido pero el status es OK, considerarlo exitoso
+        }
+      } else {
+        // Si hay error (status >= 400), intentar parsear como JSON para obtener detalles
+        console.log('❌ Error del servidor - Status:', res.status);
+        try {
+          const errorData = text ? JSON.parse(text) : {};
+          throw new Error(`Error ${res.status}: ${JSON.stringify(errorData)}`);
+        } catch (e) {
+          throw new Error(`Error ${res.status}: ${text || 'Error desconocido'}`);
+        }
+      }
+    });
+  })
+  .then(data => {
+    console.log('Producto guardado exitosamente:', data);
+    mostrarNotificacion(
+      editId ? 'Producto actualizado exitosamente' : 'Producto agregado exitosamente',
+      'success'
+    );
+    limpiarFormulario();
+    
+    // Refrescar datos inmediatamente
+    cargarProductos(currentPage);
+    actualizarEstadisticas();
+  })
+  .catch(err => {
+    console.error('Error completo:', err);
+    
+    // Verificar
+    // Intentar recargar los productos para ver si realmente se guardó
+    setTimeout(() => {
+      console.log('Verificando si el producto se guardó realmente...');
+      cargarProductos(currentPage);
+    }, 1000);
+    
+    // Mostrar error solo si es un error real (400+)
+    if (err.message.includes('400') || err.message.includes('401') || err.message.includes('403') || err.message.includes('500')) {
+      let mensajeError = 'Error al guardar el producto. ';
+      
+      if (err.message.includes('400')) {
+        mensajeError += 'Revisa que todos los campos estén correctamente completados.';
+      } else if (err.message.includes('401')) {
+        mensajeError += 'No tienes permisos para realizar esta acción.';
+      } else if (err.message.includes('403')) {
+        mensajeError += 'Acceso denegado. Verifica tus credenciales.';
+      } else {
+        mensajeError += 'Intenta nuevamente.';
+      }
+      
+      mostrarNotificacion(mensajeError, 'error');
+    } else {
+      // Si no es un error HTTP claro, puede ser solo un problema de parseo
+      console.log('Error posiblemente de parseo, verificando si la operación fue exitosa...');
+      mostrarNotificacion('Verificando si el producto se guardó correctamente...', 'success');
+    }
+  })
+  .finally(() => {
+    // Restaurar botón
+    btnSubmit.innerHTML = originalText;
+    btnSubmit.disabled = false;
+  });
+});
+
+function eliminarProducto(id) {
+  console.log('Solicitando eliminación del producto ID:', id);
+  
+  // Buscar el nombre del producto para mostrarlo en el modal
+  const fila = document.querySelector(`button[onclick="eliminarProducto(${id})"]`).closest('tr');
+  const nombreProducto = fila.querySelector('.product-name').textContent;
+  
+  // Configurar el modal con la información del producto
+  document.getElementById('producto-eliminar-nombre').innerHTML = `
+    <strong class="text-danger">"${nombreProducto}"</strong><br>
+    <small class="text-muted">Esta acción no se puede deshacer.</small>
+  `;
+  
+  // Configurar el botón de confirmación
+  const btnConfirmar = document.getElementById('btn-confirmar-eliminar');
+  btnConfirmar.onclick = function() {
+    ejecutarEliminacion(id);
+  };
+  
+  // Mostrar el modal
+  const modal = new bootstrap.Modal(document.getElementById('modalEliminar'));
+  modal.show();
+}
+
+function ejecutarEliminacion(id) {
+  console.log('Ejecutando eliminación del producto ID:', id);
+  
+  // Cerrar el modal
+  const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminar'));
+  modal.hide();
+  
+  // Mostrar indicador de carga en el botón de la tabla
+  const btnEliminar = document.querySelector(`button[onclick="eliminarProducto(${id})"]`);
+  const fila = btnEliminar ? btnEliminar.closest('tr') : null;
+  
+  if (btnEliminar) {
+    btnEliminar.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btnEliminar.disabled = true;
+  }
+  
+  // Aplicar efecto visual a la fila
+  if (fila) {
+    fila.classList.add('fade-out-row');
+  }
+
+  fetch(`/api/productos/${id}/`, {
+    method: 'DELETE',
+    headers: {
+      'X-CSRFToken': csrftoken,
+      'Authorization': 'Token ' + token
+    }
+  })
+  .then(res => {
+    console.log('Respuesta del servidor para eliminar:', res.status);
+    console.log('Respuesta del servidor para eliminar - OK:', res.ok);
+    
+    // Leer la respuesta como texto para debugging
+    return res.text().then(text => {
+      console.log('Respuesta del servidor para eliminar - Texto:', text);
+      
+      // Considerar exitosos todos los códigos 2xx, incluyendo 204 No Content común para DELETE
+      if (res.status >= 200 && res.status < 300) {
+        console.log('✅ Eliminación exitosa - Status:', res.status);
+        return { success: true };
+      } else {
+        console.log('❌ Error en eliminación - Status:', res.status);
+        try {
+          const errorData = text ? JSON.parse(text) : {};
+          throw new Error(`Error ${res.status}: ${JSON.stringify(errorData)}`);
+        } catch (e) {
+          throw new Error(`Error ${res.status}: ${text || 'Error desconocido'}`);
+        }
+      }
+    });
+  })
+  .then(result => {
+    console.log('Producto eliminado exitosamente:', result);
+    
+    // Obtener el nombre del producto para la notificación
+    const filaParaNotif = document.querySelector(`button[onclick="eliminarProducto(${id})"]`).closest('tr');
+    const nombreProducto = filaParaNotif ? filaParaNotif.querySelector('.product-name').textContent : 'Producto';
+    
+    mostrarNotificacion(`"${nombreProducto}" ha sido eliminado del inventario`, 'success');
+    
+    // Animar la eliminación de la fila
+    if (fila) {
+      fila.style.opacity = '0';
+      fila.style.transform = 'translateX(-100%)';
+      setTimeout(() => {
+        // Refrescar datos después de la animación
+        cargarProductos(currentPage);
+        actualizarEstadisticas();
+      }, 500);
+    } else {
+      // Si no hay fila, refrescar inmediatamente
+      cargarProductos(currentPage);
+      actualizarEstadisticas();
+    }
+  })
+  .catch(err => {
+    console.error('Error al eliminar producto:', err);
+    mostrarNotificacion('Error al eliminar el producto: ' + err.message, 'error');
+    
+    // Restaurar apariencia de la fila en caso de error
+    if (fila) {
+      fila.classList.remove('fade-out-row');
+    }
+  })
+  .finally(() => {
+    // Restaurar botón
+    if (btnEliminar) {
+      btnEliminar.innerHTML = '<i class="fas fa-trash"></i>';
+      btnEliminar.disabled = false;
+    }
+  });
+}
+
+function mostrarNotificacion(mensaje, tipo = 'success') {
+  // Remover notificaciones anteriores del mismo tipo para evitar spam
+  const notificacionesExistentes = document.querySelectorAll('.alert.position-fixed');
+  notificacionesExistentes.forEach(notif => {
+    if (notif.classList.contains(tipo === 'error' ? 'alert-danger' : 'alert-success')) {
+      notif.remove();
+    }
+  });
+
+  const notif = document.createElement('div');
+  notif.className = `alert alert-${tipo === 'error' ? 'danger' : 'success'} alert-dismissible fade show position-fixed`;
+  notif.style.top = '130px';
+  notif.style.right = '20px';
+  notif.style.zIndex = '10000';
+  notif.style.minWidth = '300px';
+  notif.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+  notif.style.fontWeight = '600';
+  
+  notif.innerHTML = `
+    <i class="fas fa-${tipo === 'error' ? 'exclamation-triangle' : 'check-circle'} me-2"></i>
+    ${mensaje}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  
+  document.body.appendChild(notif);
+
+  // Auto-remover después de 4 segundos (reducido para menos spam)
+  setTimeout(() => {
+    if (notif.parentNode) {
+      notif.remove();
+    }
+  }, 4000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM cargado - Iniciando carga de productos');
+  console.log('Token disponible:', !!token);
+  console.log('CSRF Token:', csrftoken);
+  
+  // Verificar que las funciones estén disponibles globalmente
+  window.mostrarFormularioModificar = mostrarFormularioModificar;
+  window.eliminarProducto = eliminarProducto;
+  
+  // Configurar eventos del modal de eliminación
+  const modalEliminar = document.getElementById('modalEliminar');
+  
+  // Focus automático en el botón cancelar cuando se abre el modal
+  modalEliminar.addEventListener('shown.bs.modal', function () {
+    const btnCancelar = modalEliminar.querySelector('.btn-outline-secondary');
+    btnCancelar.focus();
+  });
+  
+  // Limpiar contenido cuando se cierra el modal
+  modalEliminar.addEventListener('hidden.bs.modal', function () {
+    document.getElementById('producto-eliminar-nombre').innerHTML = 'Esta acción no se puede deshacer.';
+    const btnConfirmar = document.getElementById('btn-confirmar-eliminar');
+    btnConfirmar.onclick = null;
+  });
+  
+  // Ejecutar test de funciones
+  setTimeout(testFunciones, 1000);
+  
+  // Cargar datos iniciales
+  cargarProductos(1); // Cargar primera página
+  
+  // Cargar marcas de vehículos con un pequeño delay para asegurar que el DOM esté listo
+  setTimeout(() => {
+    cargarMarcasVehiculos();
+  }, 500);
+  
+  // Event listeners para compatibilidad de vehículos
+  document.getElementById('marca-vehiculo').addEventListener('change', function() {
+    cargarModelosVehiculos(this.value);
+  });
+  
+  document.getElementById('btn-agregar-compatibilidad').addEventListener('click', agregarCompatibilidad);
+  
+  // Manejar el checkbox de compatibilidad total
+  (function() {
+    const chkTodas = document.getElementById('compatibilidad-todas-marcas');
+    const marcaSelect = document.getElementById('marca-vehiculo');
+    const modeloSelect = document.getElementById('modelo-vehiculo');
+    const añoDesde = document.getElementById('año-desde');
+    const añoHasta = document.getElementById('año-hasta');
+    const notas = document.getElementById('notas-compatibilidad');
+    if (!chkTodas) return;
+    chkTodas.addEventListener('change', function() {
+        if (this.checked) {
+            marcaSelect.disabled = true;
+            modeloSelect.disabled = true;
+            añoDesde.disabled = true;
+            añoHasta.disabled = true;
+            notas.disabled = true;
+            marcaSelect.value = '';
+            modeloSelect.innerHTML = '<option value="">Seleccione modelo</option>';
+            modeloSelect.value = '';
+            añoDesde.value = '';
+            añoHasta.value = '';
+            notas.value = '';
+        } else {
+            marcaSelect.disabled = false;
+            modeloSelect.disabled = true;
+            añoDesde.disabled = false;
+            añoHasta.disabled = false;
+            notas.disabled = false;
+            cargarMarcasVehiculos();
+        }
+    });
+  })();
+});
+</script>
+    
+    <script>
+        // Actualizar estadísticas después de cargar productos
+        function actualizarEstadisticas() {
+            // Obtener el total de productos sin paginación
+            fetch('/api/productos/?per_page=1000') // Obtener un número alto para contar todos
+                .then(res => res.json())
+                .then(data => {
+                    const pagination = data.pagination;
+                    const totalProductos = pagination ? pagination.total_items : (data.productos || data).length;
+                    
+                    // Para el stock total, necesitamos obtener todos los productos
+                    fetch('/api/productos/?per_page=1000')
+                        .then(res => res.json())
+                        .then(stockData => {
+                            const productos = stockData.productos || stockData;
+                            const totalStock = productos.reduce((sum, p) => sum + (p.stock || 0), 0);
+                            
+                            document.getElementById('total-productos').textContent = totalProductos;
+                            document.getElementById('total-stock').textContent = totalStock.toLocaleString('es-CL');
+                        });
+                })
+                .catch(err => console.error('Error actualizando estadísticas:', err));
+        }
+
+        // Cargar estadísticas al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(actualizarEstadisticas, 1000);
+        });
+
+        // Actualizar estadísticas después de operaciones CRUD
+        const originalCargarProductos = cargarProductos;
+        cargarProductos = function(page = 1) {
+            originalCargarProductos(page);
+            setTimeout(actualizarEstadisticas, 500);
+        };
+    </script>
+</body>
+</html>

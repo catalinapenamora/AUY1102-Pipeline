@@ -1,0 +1,758 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Catálogo | AutoParts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'img/favicon.ico.png' %}" type="image/x-icon">
+
+    <!-- Tipografías y Estilos -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <link href="{% static 'css/catalogo.css' %}" rel="stylesheet"> <!-- Nuevo CSS -->
+
+    {% include "base/header.html" %}
+</head>
+<body>
+<!-- Contenedor principal con padding superior para evitar que el header fijo tape el contenido -->
+<div class="container-fluid fruite py-5" style="padding-top: 120px !important;">
+  <div class="container py-5">
+    <!-- Título de la página -->
+    <header class=" mb-5">
+      <h1 class="mb-4 text-center">Catálogo de Productos</h1>
+    </header>
+    
+    <!-- Contenido principal del catálogo -->
+    <main class="catalog-main">
+      <div class="row g-4">
+        <!-- CATEGORÍAS -->
+        <aside class="col-lg-3 sidebar-categories">
+          <section class="categories-section">
+            <h4 class="categories-title">Categorías</h4>
+            <ul class="list-unstyled fruite-categorie">
+          <li>
+            <div class="d-flex justify-content-between fruite-name">
+              <a href="?categoria="><i class="fas fa-list me-2"></i> Todas</a>
+              <span>({{ productos.count }})</span>
+            </div>
+          </li>
+          {% for categoria in categorias %}
+          <li>
+            <div class="d-flex justify-content-between fruite-name">
+              <a href="?categoria={{ categoria.id }}">
+                <i class="fas fa-tools me-2"></i>{{ categoria.nombre }}
+              </a>
+              <span>({{ categoria.productos.count }})</span>
+            </div>
+          </li>
+          {% endfor %}
+            </ul>
+          </section>
+        </aside>
+
+        <!-- PRODUCTOS + ORDENAR -->
+        <section class="col-lg-9 products-section">
+          <!-- Controles de ordenamiento -->
+          <div class="row justify-content-end mb-3">
+            <div class="col-md-4">
+              <label for="ordenar" class="form-label">Ordenar por:</label>
+            <select id="ordenar-select" class="form-select">
+              <option value="">Ordenar por</option>
+              <option value="precio_asc">Precio: menor a mayor</option>
+              <option value="precio_desc">Precio: mayor a menor</option>
+              <option value="nombre_asc">Nombre: A - Z</option>
+              <option value="nombre_desc">Nombre: Z - A</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Barra de búsqueda y filtros avanzados -->
+<div class="row mb-4 align-items-end">
+  <div class="col-md-5 mb-2 mb-md-0">
+    <label for="busqueda-producto" class="form-label fw-bold">Buscar producto</label>
+    <div class="input-group shadow-sm">
+      <input type="text" id="busqueda-producto" class="form-control" placeholder="Buscar por nombre, descripción...">
+      <button class="btn btn-primary" id="btn-buscar-producto" type="button"><i class="fas fa-search"></i></button>
+    </div>
+  </div>
+  <div class="col-md-3 mb-2 mb-md-0">
+    <label for="filtro-marca" class="form-label fw-bold">Marca vehículo</label>
+    <select id="filtro-marca" class="form-select">
+      <option value="">Todas las marcas</option>
+    </select>
+  </div>
+  <div class="col-md-3 mb-2 mb-md-0">
+    <label for="filtro-modelo" class="form-label fw-bold">Modelo vehículo</label>
+    <select id="filtro-modelo" class="form-select" disabled>
+      <option value="">Todos los modelos</option>
+    </select>
+  </div>
+</div>
+
+        <!-- Contador de productos -->
+        <div class="row mb-3">
+          <div class="col-12">
+            <div id="product-count" class="text-center">
+              <!-- El contador se actualizará con JavaScript -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid de productos -->
+        <div id="productos-container" class="row g-4 justify-content-center">
+          <!-- Productos renderizados con JS -->
+        </div>
+
+        <!-- Paginación -->
+        <div class="row mt-5">
+          <div class="col-12">
+            <div id="pagination-container" class="d-flex justify-content-center">
+              <!-- La paginación se generará con JavaScript -->
+            </div>
+          </div>
+        </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+        
+        <!-- Estilos adicionales para paginación -->
+        <style>
+          /* Contenedor de paginación */
+          #pagination-container {
+            margin: 30px 0;
+          }
+          
+          /* Estilos modernos para la paginación */
+          .pagination {
+            --bs-pagination-color: #780000;
+            --bs-pagination-hover-color: #ffffff;
+            --bs-pagination-hover-bg: #780000;
+            --bs-pagination-active-bg: #780000;
+            --bs-pagination-active-border-color: #780000;
+            --bs-pagination-border-color: #dee2e6;
+            gap: 4px;
+            margin-bottom: 0;
+          }
+          
+          .pagination .page-item {
+            display: inline-flex;
+            align-items: center;
+          }
+          
+          .pagination .page-link {
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            color: #780000;
+            padding: 8px 12px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+            min-width: 40px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          }
+          
+          .pagination .page-item.active .page-link {
+            background-color: #780000;
+            border-color: #780000;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(120, 0, 0, 0.3);
+          }
+          
+          .pagination .page-link:hover:not(.disabled) {
+            background-color: #780000;
+            border-color: #780000;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(120, 0, 0, 0.2);
+          }
+          
+          .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            cursor: not-allowed;
+            opacity: 0.6;
+          }
+          
+          /* Estilos para los botones de navegación (anterior/siguiente) */
+          .pagination .page-item:first-child .page-link,
+          .pagination .page-item:last-child .page-link {
+            font-weight: 600;
+            padding: 8px 16px;
+          }
+          
+          /* Contador de productos */
+          #product-count {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+            text-align: center;
+          }
+          
+          #product-count p {
+            margin: 0;
+            padding: 8px 16px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            display: inline-block;
+          }
+          
+          /* Responsive: en pantallas pequeñas */
+          @media (max-width: 576px) {
+            .pagination {
+              flex-wrap: wrap;
+              gap: 2px;
+            }
+            
+            .pagination .page-link {
+              padding: 6px 10px;
+              font-size: 0.9rem;
+              min-width: 36px;
+            }
+            
+            .pagination .page-item:first-child .page-link,
+            .pagination .page-item:last-child .page-link {
+              padding: 6px 12px;
+            }
+          }
+        </style>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'lib/easing/easing.min.js' %}"></script>
+<script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+<script src="{% static 'lib/lightbox/js/lightbox.min.js' %}"></script>
+<script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+<!-- AuthManager debe cargarse ANTES de catalogo.js -->
+<script src="{% static 'js/auth.js' %}"></script>
+<script >// Función para formatear precios con separadores de miles (formato chileno)
+function formatPrice(price) {
+    return `$${Math.round(price).toLocaleString('es-CL')}`;
+}
+
+// Variables globales para paginación
+let currentPage = 1;
+let totalPages = 1;
+let currentFilters = {};
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Esperar a que AuthManager esté disponible
+    const waitForAuthManager = () => {
+        return new Promise((resolve) => {
+            if (window.authManager) {
+                resolve();
+            } else {
+                setTimeout(() => waitForAuthManager().then(resolve), 100);
+            }
+        });
+    };
+
+    waitForAuthManager().then(() => {
+        console.log("✅ CATÁLOGO: AuthManager disponible");
+        initializeCatalog();
+    });
+});
+
+function initializeCatalog() {
+    const selectOrden = document.getElementById("ordenar-select");
+
+    // Obtener página inicial de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    currentPage = parseInt(urlParams.get("page")) || 1;
+    cargarMarcasFiltro();
+     document.getElementById('filtro-marca').addEventListener('change', function () {
+        cargarModelosFiltro(this.value);
+        cargarProductos(1);
+    });
+
+    document.getElementById('filtro-modelo').addEventListener('change', function () {
+        cargarProductos(1);
+    });
+
+    document.getElementById('btn-buscar-producto').addEventListener('click', function () {
+        cargarProductos(1);
+    });
+
+    document.getElementById('busqueda-producto').addEventListener('keyup', function (e) {
+        if (e.key === 'Enter') cargarProductos(1);
+    });
+    // Cargar marcas y modelos para los filtros
+async function cargarMarcasFiltro() {
+    const selectMarca = document.getElementById('filtro-marca');
+    if (!selectMarca) return;
+    selectMarca.innerHTML = '<option value="">Todas las marcas</option>';
+    try {
+        console.log("📡 Solicitando marcas...");
+        const res = await fetch('/api/marcas-vehiculos/');
+        const data = await res.json();
+        data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        data.forEach(marca => {
+            selectMarca.innerHTML += `<option value="${marca.nombre}">${marca.nombre}</option>`;
+        });
+    } catch (e) {
+        console.error("❌ Error cargando marcas", e);
+        selectMarca.innerHTML = '<option value="">Error cargando marcas</option>';
+    }
+}
+
+async function cargarModelosFiltro(marcaNombre) {
+    const selectModelo = document.getElementById('filtro-modelo');
+    if (!selectModelo) return;
+    selectModelo.innerHTML = '<option value="">Todos los modelos</option>';
+    selectModelo.disabled = true;
+    if (!marcaNombre) return;
+    try {
+        console.log("📡 Solicitando modelos para marca:", marcaNombre);
+        const res = await fetch(`/api/modelos-vehiculos/?marca=${encodeURIComponent(marcaNombre)}`);
+        const data = await res.json();
+        data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        data.forEach(modelo => {
+            selectModelo.innerHTML += `<option value="${modelo.nombre}">${modelo.nombre}</option>`;
+        });
+        selectModelo.disabled = false;
+    } catch (e) {
+        console.error("❌ Error cargando modelos", e);
+        selectModelo.innerHTML = '<option value="">Error cargando modelos</option>';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  cargarMarcasFiltro();
+  document.getElementById('filtro-marca').addEventListener('change', function() {
+    cargarModelosFiltro(this.value);
+  });
+});
+
+// Modificar cargarProductos para incluir búsqueda y filtros
+function cargarProductos(page = 1) {
+  const params = new URLSearchParams(window.location.search);
+  const categoria = params.get('categoria');
+  const orden = params.get('orden');
+  const busqueda = document.getElementById('busqueda-producto')?.value || '';
+  const marca = document.getElementById('filtro-marca')?.value || '';
+  const modelo = document.getElementById('filtro-modelo')?.value || '';
+
+  currentFilters = { categoria, orden, busqueda, marca, modelo };
+  currentPage = page;
+
+  if (selectOrden && orden) {
+    selectOrden.value = orden;
+  }
+
+  let url = '/api/productos/';
+  const queryParams = new URLSearchParams();
+  if (categoria) queryParams.append('categoria', categoria);
+  if (orden) queryParams.append('orden', orden);
+  if (busqueda) queryParams.append('busqueda', busqueda);
+  if (marca) queryParams.append('marca', marca);
+  if (modelo) queryParams.append('modelo', modelo);
+  queryParams.append('page', page);
+  queryParams.append('per_page', 12);
+  if (queryParams.toString()) {
+    url += '?' + queryParams.toString();
+  }
+
+  console.log("🔗 Cargando productos:", url);
+
+  fetch(url)
+      .then(res => res.json())
+      .then(data => {
+          console.log("📦 Datos recibidos:", data);
+          
+          // Verificar si la respuesta tiene el formato de paginación
+          const productos = data.productos || data; // Compatibilidad con formato anterior
+          const pagination = data.pagination;
+
+          const container = document.getElementById("productos-container");
+          container.innerHTML = '';
+
+          // Mostrar mensaje si no hay productos
+          if (!productos || productos.length === 0) {
+              container.innerHTML = `
+                  <div class="col-12 text-center py-5">
+                      <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                      <h4 class="text-muted">No se encontraron productos</h4>
+                      <p class="text-muted">Intenta cambiar los filtros o el orden.</p>
+                  </div>
+              `;
+              updatePagination(null);
+              return;
+          }
+
+          productos.forEach(p => {
+              console.log("Producto:", p);
+              const card = `
+              <div class="col-md-6 col-lg-6 col-xl-4 mb-4">
+                  <div class="product-card-wrapper h-100">
+                      <a href="/producto/${p.id}" class="text-decoration-none h-100 d-block">
+                      <div class="rounded position-relative fruite-item h-100">
+                          <div class="fruite-img">
+                          <img src="${p.imagen}" class="img-fluid w-100 rounded-top" alt="${p.nombre}">
+                          </div>
+                          <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">${p.nombre_categoria}</div>
+                          <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                          <h4>${p.nombre}</h4>
+                          <p>${p.descripcion}</p>
+                          <div class="d-flex justify-content-between flex-lg-wrap">
+                              <div class="price-info">
+                                  <p class="text-dark fs-5 fw-bold mb-0">
+                                  ${ES_EMPRESA 
+                                      ? formatPrice(p.precio_mayorista)
+                                      : formatPrice(p.precio)}
+                                  </p>
+                                  <small class="text-muted">IVA incluido</small>
+                              </div>
+                          </div>
+                          </div>
+                      </div>
+                      </a>
+                      <button onclick="agregarAlCarrito(${p.id})" class="btn border border-secondary rounded-pill px-3 text-primary mt-2 w-100">
+                              <i class="fa fa-shopping-bag me-2 text-primary"></i> Añadir al carro
+                       </button>
+                  </div>
+              </div>`;
+              container.innerHTML += card;
+          });
+
+          // Actualizar paginación
+          if (pagination) {
+              totalPages = pagination.total_pages;
+              updatePagination(pagination);
+              updateProductCount(pagination);
+          }
+      })
+      .catch(err => {
+          console.error("Error cargando productos:", err);
+          const container = document.getElementById("productos-container");
+          container.innerHTML = `
+              <div class="col-12 text-center py-5">
+                  <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                  <h4 class="text-muted">Error cargando productos</h4>
+                  <p class="text-muted">Por favor, recarga la página.</p>
+              </div>
+          `;
+      });
+    }
+
+    if (selectOrden) {
+        selectOrden.addEventListener("change", () => {
+            const orden = selectOrden.value;
+            const params = new URLSearchParams(window.location.search);
+
+            if (orden) {
+                params.set("orden", orden);
+            } else {
+                params.delete("orden");
+            }
+            
+            // Resetear a página 1 cuando cambie el orden
+            params.delete("page");
+
+            const nuevaUrl = `${window.location.pathname}?${params.toString()}`;
+            window.history.replaceState({}, '', nuevaUrl);
+            cargarProductos(1);
+        });
+    }
+
+    cargarProductos(currentPage);
+}
+
+// Función para actualizar la paginación
+function updatePagination(pagination) {
+    const paginationContainer = document.getElementById("pagination-container");
+    
+    if (!pagination || pagination.total_pages <= 1) {
+        paginationContainer.innerHTML = '';
+        return;
+    }
+
+    const { current_page, total_pages, has_previous, has_next } = pagination;
+    
+    let paginationHTML = '<nav aria-label="Paginación de productos"><ul class="pagination justify-content-center">';
+    
+    // Botón "Anterior"
+    if (has_previous) {
+        paginationHTML += `
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="changePage(${current_page - 1})" aria-label="Anterior">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        `;
+    } else {
+        paginationHTML += `
+            <li class="page-item disabled">
+                <span class="page-link">&laquo;</span>
+            </li>
+        `;
+    }
+
+    // Números de página
+    const startPage = Math.max(1, current_page - 2);
+    const endPage = Math.min(total_pages, current_page + 2);
+
+    if (startPage > 1) {
+        paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(1)">1</a></li>`;
+        if (startPage > 2) {
+            paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        if (i === current_page) {
+            paginationHTML += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+        } else {
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${i})">${i}</a></li>`;
+        }
+    }
+
+    if (endPage < total_pages) {
+        if (endPage < total_pages - 1) {
+            paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${total_pages})">${total_pages}</a></li>`;
+    }
+
+    // Botón "Siguiente"
+    if (has_next) {
+        paginationHTML += `
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="changePage(${current_page + 1})" aria-label="Siguiente">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        `;
+    } else {
+        paginationHTML += `
+            <li class="page-item disabled">
+                <span class="page-link">&raquo;</span>
+            </li>
+        `;
+    }
+
+    paginationHTML += '</ul></nav>';
+    paginationContainer.innerHTML = paginationHTML;
+}
+
+// Función para actualizar el contador de productos
+function updateProductCount(pagination) {
+    const countContainer = document.getElementById("product-count");
+    if (countContainer && pagination) {
+        const { current_page, total_items, per_page } = pagination;
+        const startItem = (current_page - 1) * per_page + 1;
+        const endItem = Math.min(current_page * per_page, total_items);
+        
+        countContainer.innerHTML = `
+            <p class="text-muted">
+                Mostrando ${startItem}-${endItem} de ${total_items} productos
+            </p>
+        `;
+    }
+}
+
+// Función global para cambiar de página
+window.changePage = function(page) {
+    const params = new URLSearchParams(window.location.search);
+    params.set("page", page);
+    
+    const nuevaUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, '', nuevaUrl);
+    
+    // Scroll hacia arriba suavemente
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Necesitamos redefinir cargarProductos aquí o pasarla como referencia
+    const selectOrden = document.getElementById("ordenar-select");
+    const params2 = new URLSearchParams(window.location.search);
+    const categoria = params2.get("categoria");
+    const orden = params2.get("orden");
+
+    let url = "/api/productos/";
+    const queryParams = new URLSearchParams();
+    
+    if (categoria) queryParams.append("categoria", categoria);
+    if (orden) queryParams.append("orden", orden);
+    queryParams.append("page", page);
+    queryParams.append("per_page", 12);
+
+    if (queryParams.toString()) {
+        url += "?" + queryParams.toString();
+    }
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            const productos = data.productos || data;
+            const pagination = data.pagination;
+
+            const container = document.getElementById("productos-container");
+            container.innerHTML = '';
+
+            if (!productos || productos.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No se encontraron productos</h4>
+                        <p class="text-muted">Intenta cambiar los filtros o el orden.</p>
+                    </div>
+                `;
+                updatePagination(null);
+                return;
+            }
+
+            productos.forEach(p => {
+                const card = `
+                <div class="col-md-6 col-lg-6 col-xl-4 mb-4">
+                    <div class="product-card-wrapper h-100">
+                        <a href="/producto/${p.id}" class="text-decoration-none h-100 d-block">
+                        <div class="rounded position-relative fruite-item h-100">
+                            <div class="fruite-img">
+                            <img src="${p.imagen}" class="img-fluid w-100 rounded-top" alt="${p.nombre}">
+                            </div>
+                            <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">${p.nombre_categoria}</div>
+                            <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                            <h4>${p.nombre}</h4>
+                            <p>${p.descripcion}</p>
+                            <div class="d-flex justify-content-between flex-lg-wrap">
+                                <div class="price-info">
+                                    <p class="text-dark fs-5 fw-bold mb-0">
+                                    ${ES_EMPRESA 
+                                        ? formatPrice(p.precio_mayorista)
+                                        : formatPrice(p.precio)}
+                                    </p>
+                                    <small class="text-muted">IVA incluido</small>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        </a>
+                        <button onclick="agregarAlCarrito(${p.id})" class="btn border border-secondary rounded-pill px-3 text-primary mt-2 w-100">
+                                <i class="fa fa-shopping-bag me-2 text-primary"></i> Añadir al carro
+                         </button>
+                    </div>
+                </div>`;
+                container.innerHTML += card;
+            });
+
+            if (pagination) {
+                updatePagination(pagination);
+                updateProductCount(pagination);
+            }
+        })
+        .catch(err => {
+            console.error("Error cargando productos:", err);
+        });
+};
+
+async function agregarAlCarrito(productoId) {
+            try {
+                // Usar AuthManager para agregar al carrito (híbrido)
+                const resultado = await window.authManager.agregarAlCarrito(productoId, 1);
+                
+                if (resultado.success) {
+                    if (resultado.type === 'guest') {
+                        mostrarNotificacion('Producto agregado al carrito de invitado. Inicia sesión para finalizar tu compra.', 'success');
+                    } else {
+                        mostrarNotificacion('Producto agregado al carrito', 'success');
+                    }
+                } else {
+                    mostrarNotificacion(resultado.error || 'Error al agregar producto', 'error');
+                }
+            } catch (error) {
+                console.error("Error al agregar al carrito:", error);
+                mostrarNotificacion('Error al agregar producto al carrito', 'error');
+            }
+        }
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+        const notif = document.createElement('div');
+        notif.className = `alert alert-${tipo === 'error' ? 'danger' : 'success'} position-fixed`;
+        notif.style.top = '120px'; // Debajo del header fijo
+        notif.style.right = '20px';
+        notif.style.left = '20px';
+        notif.style.maxWidth = '400px';
+        notif.style.margin = '0 auto';
+        notif.style.zIndex = '10000'; // Z-index más alto
+        notif.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+        notif.style.borderRadius = '8px';
+        notif.style.fontWeight = '600';
+        notif.style.textAlign = 'center';
+        notif.innerHTML = `<i class="fas fa-${tipo === 'error' ? 'exclamation-triangle' : 'check-circle'} me-2"></i>${mensaje}`;
+        
+        // Responsive: ajustar posición en móviles
+        if (window.innerWidth <= 768) {
+            notif.style.top = '100px';
+            notif.style.right = '10px';
+            notif.style.left = '10px';
+            notif.style.fontSize = '0.9rem';
+        }
+        
+        document.body.appendChild(notif);
+
+        setTimeout(() => {
+            notif.style.opacity = '0';
+            notif.style.transform = 'translateY(-20px)';
+            notif.style.transition = 'all 0.3s ease-out';
+            setTimeout(() => {
+                if (notif.parentNode) {
+                    notif.remove();
+                }
+            }, 300);
+        }, 3000);
+        }
+        async function actualizarContadorCarrito() {
+            // Usar AuthManager para actualizar contador híbrido
+            if (window.authManager) {
+                await window.authManager.actualizarContadorCarrito();
+            }
+        }
+        </script>
+<script>
+  const ES_EMPRESA = {{ es_empresa|yesno:"true,false" }};
+</script>
+
+<style>
+/* Barra de búsqueda y filtros */
+#busqueda-producto, #filtro-marca, #filtro-modelo {
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  font-size: 1rem;
+  padding: 10px 14px;
+  margin-bottom: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transition: border-color 0.2s;
+}
+#busqueda-producto:focus, #filtro-marca:focus, #filtro-modelo:focus {
+  border-color: #780000;
+  outline: none;
+}
+#btn-buscar-producto {
+  background: linear-gradient(135deg, #780000, #a01c1c);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+#btn-buscar-producto:hover {
+  background: linear-gradient(135deg, #a01c1c, #780000);
+}
+</style>
+
+{% include "base/footer.html" %}
+</body>
+</html>

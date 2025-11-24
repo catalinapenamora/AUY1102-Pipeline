@@ -1,0 +1,104 @@
+# .github/workflows/ci_cd_pipeline.yml
+name: Integración Continua y Entrega Continua (CI/CD)
+
+# DISPARADORES (Triggers)
+on:
+  push:
+    branches:
+      - develop # Ejecuta en cada push a develop (para despliegue)
+  pull_request:
+    branches:
+      - main # Ejecuta en cada PR a main (para seguridad y revisión)
+
+# --- JOB 1: SEGURIDAD Y CALIDAD (Parte 2) ---
+security-scan:
+    runs-on: ubuntu-latest
+    
+    # Solo ejecuta este job en Pull Requests a main (momento ideal para revisar seguridad)
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+
+    steps:
+    - name: ⬇️ Checkout del Código
+      uses: actions/checkout@v3
+
+    # REQUISITO: GitHub Advanced Security (CodeQL)
+    - name: 🛡️ Configurar y Ejecutar CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: python
+        
+    - name: Ejecutar Análisis de CodeQL
+      uses: github/codeql-action/analyze@v3
+
+    # REQUISITO: Integrar Snyk
+    - name: 🚨 Escaneo de Vulnerabilidades de Dependencias con Snyk
+      uses: snyk/actions/python@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} 
+      with:
+        command: test # Usa 'test' para que la tarea falle si hay problemas
+        args: --file=requirements.txt
+
+    # REQUISITO: Integrar SonarCloud
+    - name: 🔍 Análisis de Calidad con SonarCloud
+      uses: SonarSource/sonarcloud-github-action@v2.1.1
+      with:
+        projectBaseDir: backend 
+        args: >
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
+        
+# --- JOB 2: CONSTRUCCIÓN, PRUEBAS Y PUBLICACIÓN (Parte 1) ---
+build-test-publish: 
+    runs-on: ubuntu-latest
+    
+    # REQUISITO: Interrumpir el despliegue
+    # Este Job NO se ejecuta si el Job 'security-scan' falló.
+    needs: [security-scan] 
+
+    steps:
+    - name: ⬇️ Checkout del Código
+      uses: actions/checkout@v3
+
+    - name: 🔑 Iniciar Sesión en Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: ⚙️ Configurar Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # REQUISITO: Construcción de la imagen Docker. (Usando tu Dockerfile)
+    - name: 🏗️ Construir Imagen Docker
+      id: docker_build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        tags: ${{ secrets.DOCKER_USERNAME }}/autopartss:latest
+
+    # REQUISITO: Integrar Docker Scout
+    - name: 🐳 Escaneo de la Imagen con Docker Scout
+      uses: docker/scout-action@v1
+      with:
+        image: ${{ secrets.DOCKER_USERNAME }}/autopartss:latest
+        command: cves
+
+    # REQUISITO: Ejecución de pruebas unitarias dentro del contenedor.
+    - name: 🧪 Ejecutar Pruebas Unitarias
+      run: |
+        docker run --rm ${{ secrets.DOCKER_USERNAME }}/autopartss:latest python backend/manage.py test
+
+    # REQUISITO: Publicación en Docker Hub si las pruebas son exitosas.
+    - name: 🚀 Publicar Imagen en Docker Hub
+      # SÓLO se publica si todo lo anterior fue 'success()' Y es un push directo a 'develop'.
+      if: success() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true 
+        tags: ${{ secrets.DOCKER_USERNAME }}/autopartss:latest

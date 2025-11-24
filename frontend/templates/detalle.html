@@ -1,0 +1,175 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Detalle de Producto | AutoParts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <!-- Favicon -->
+        <link rel="icon" href="{% static 'img/favicon.ico.png' %}" type="image/x-icon"> 
+
+    <!-- Fuentes e íconos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+
+    <!-- Estilos -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    {% include "base/header.html" %}
+</head>
+<body>
+<main class="container contenido-con-navbar">
+    <div class="detalle-container">
+        <div class="row g-4 align-items-start">
+            <!-- Imagen del producto -->
+            <div class="col-md-6">
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-fluid rounded">
+            </div>
+
+            <!-- Información del producto -->
+            <div class="col-md-6 d-flex flex-column justify-content-center" style="margin-top: 40px;">
+                <h2 class="fw-bold">{{ producto.nombre }}</h2>
+                <p class="text-muted">Categoría: {{ producto.categoria.nombre }}</p>
+                <div class="price-section mb-3">
+                    <h4 class="fw-semibold mb-1">
+                        {% if es_empresa %}
+                            {{ producto.precio_mayorista|formato_clp }}
+                            <span class="badge bg-success ms-2">Mayorista</span>
+                        {% else %}
+                            {{ producto.precio|formato_clp }}
+                        {% endif %}
+                    </h4>
+                    <p class="text-muted mb-1">
+                        <small>IVA incluido</small>
+                    </p>
+                </div>
+                <p class="fw-semibold text-success">Stock disponible: {{ producto.stock }}</p>
+                <p>{{ producto.descripcion }}</p>
+
+            </div>
+            <button onclick="agregarAlCarrito({{ producto.id }})" class="btn border border-secondary rounded-pill px-3 text-primary">
+            <i class="fa fa-shopping-bag me-2 text-primary"></i> Añadir al carro
+            </button>
+        </div>
+        <div class="mt-5">
+  <h4 class="fw-bold mb-3">Especificaciones del Producto</h4>
+  <table class="table table-bordered table-striped">
+    <tbody>
+      {% if producto.largo or producto.ancho or producto.alto or producto.peso %}
+      <tr><th colspan="2" class="bg-light text-dark">Dimensiones y Peso</th></tr>
+      {% if producto.largo %}<tr><td><strong>Largo</strong></td><td>{{ producto.largo }} cm</td></tr>{% endif %}
+      {% if producto.ancho %}<tr><td><strong>Ancho</strong></td><td>{{ producto.ancho }} cm</td></tr>{% endif %}
+      {% if producto.alto %}<tr><td><strong>Alto</strong></td><td>{{ producto.alto }} cm</td></tr>{% endif %}
+      {% if producto.peso %}<tr><td><strong>Peso</strong></td><td>{{ producto.peso }} kg</td></tr>{% endif %}
+      {% endif %}
+
+      <tr><th colspan="2" class="bg-light text-dark">Compatibilidad Vehicular</th></tr>
+      {% with producto.compatibilidades.all as compatibilidades %}
+        {% if compatibilidades %}
+          {% for c in compatibilidades %}
+            {% if c.todas %}
+              <tr><td colspan="2">Compatible con todos los modelos de vehículos</td></tr>
+            {% elif c.modelo_vehiculo %}
+              <tr>
+                <td>{{ c.modelo_vehiculo.marca_vehiculo.nombre }}</td>
+                <td>{{ c.modelo_vehiculo.nombre }} ({{ c.año_desde }} - {{ c.año_hasta|default:"presente" }})</td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <tr><td colspan="2">Sin información de compatibilidad registrada</td></tr>
+        {% endif %}
+      {% endwith %}
+    </tbody>
+  </table>
+</div>
+
+    </div>
+</main>
+<!-- ALERTA DE CONFIRMACIÓN DE RETIRO -->
+<div id="alerta-retiro" class="toast position-fixed top-50 start-50 translate-middle text-bg-warning border-0" 
+     style="z-index: 1050; display: none; min-width: 300px;">
+  <div class="toast-header bg-warning text-dark border-0">
+    <strong class="me-auto"><i class="fas fa-box-open me-1"></i> Retiro de Pedido</strong>
+    <button type="button" class="btn-close" aria-label="Cerrar" onclick="cancelarRetiro()"></button>
+  </div>
+  <div class="toast-body">
+    <p class="mb-3">¿Confirmar que el cliente ha retirado el pedido?</p>
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-sm btn-secondary me-2" onclick="cancelarRetiro()">No</button>
+      <button class="btn btn-sm btn-warning" onclick="ejecutarRetiro()">Sí</button>
+    </div>
+  </div>
+</div>
+
+{% include "base/footer.html" %}
+<script src="{% static 'js/auth.js' %}"></script>
+<script src="{% static 'js/detalle.js' %}"></script>
+<script>
+async function agregarAlCarrito(productoId) {
+            try {
+                // Usar AuthManager para agregar al carrito (híbrido)
+                const resultado = await window.authManager.agregarAlCarrito(productoId, 1);
+                
+                if (resultado.success) {
+                    if (resultado.type === 'guest') {
+                        mostrarNotificacion('Producto agregado al carrito de invitado. Inicia sesión para finalizar tu compra.', 'success');
+                    } else {
+                        mostrarNotificacion('Producto agregado al carrito', 'success');
+                    }
+                } else {
+                    mostrarNotificacion(resultado.error || 'Error al agregar producto', 'error');
+                }
+            } catch (error) {
+                console.error("Error al agregar al carrito:", error);
+                mostrarNotificacion('Error al agregar producto al carrito', 'error');
+            }
+        }
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+        const notif = document.createElement('div');
+        notif.className = `alert alert-${tipo === 'error' ? 'danger' : 'success'} position-fixed`;
+        notif.style.top = '120px'; // Debajo del header fijo
+        notif.style.right = '20px';
+        notif.style.left = '20px';
+        notif.style.maxWidth = '400px';
+        notif.style.margin = '0 auto';
+        notif.style.zIndex = '10000'; // Z-index más alto
+        notif.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+        notif.style.borderRadius = '8px';
+        notif.style.fontWeight = '600';
+        notif.style.textAlign = 'center';
+        notif.innerHTML = `<i class="fas fa-${tipo === 'error' ? 'exclamation-triangle' : 'check-circle'} me-2"></i>${mensaje}`;
+        
+        // Responsive: ajustar posición en móviles
+        if (window.innerWidth <= 768) {
+            notif.style.top = '100px';
+            notif.style.right = '10px';
+            notif.style.left = '10px';
+            notif.style.fontSize = '0.9rem';
+        }
+        
+        document.body.appendChild(notif);
+
+        setTimeout(() => {
+            notif.style.opacity = '0';
+            notif.style.transform = 'translateY(-20px)';
+            notif.style.transition = 'all 0.3s ease-out';
+            setTimeout(() => {
+                if (notif.parentNode) {
+                    notif.remove();
+                }
+            }, 300);
+        }, 3000);
+        }
+        async function actualizarContadorCarrito() {
+            // Usar AuthManager para actualizar contador híbrido
+            if (window.authManager) {
+                await window.authManager.actualizarContadorCarrito();
+            }
+        }
+</script>
+</body>
+</html>

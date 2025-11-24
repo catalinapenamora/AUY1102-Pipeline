@@ -1,0 +1,540 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Dashboard de Pedidos - AutoParts</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link rel="icon" href="{% static 'img/favicon.ico.png' %}" type="image/x-icon"> 
+
+    <!-- Fuentes y estilos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Librerías -->
+    <link href="{% static 'lib/lightbox/css/lightbox.min.css' %}" rel="stylesheet">
+    <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+
+    <!-- Bootstrap y estilos -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    <style>
+        .dashboard-stats {
+            background: linear-gradient(135deg, #780000 0%, #003049 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .filter-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .pedido-row:hover {
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+        
+        .estado-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .estado-pendiente {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .estado-pagado {
+            background-color: #d1edff;
+            color: #0c5460;
+        }
+        
+        .estado-listo_retiro {
+            background-color: #e2e3ff;
+            color: #3d348b;
+        }
+        
+        .estado-retirado {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .estado-preparacion {
+            background-color: #ffeaa7;
+            color: #b8860b;
+        }
+        
+        .estado-enviado {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .estado-fallido {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .estado-cancelado {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .metodo-webpay {
+            color: #0066cc;
+        }
+        
+        .metodo-transferencia {
+            color: #28a745;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .dashboard-container {
+            padding-top: 180px;
+        }
+    </style>
+
+    {% include "base/header.html" %}
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="container-fluid">
+        <!-- Encabezado del Dashboard -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-0">
+                            <i class="fas fa-chart-line"></i> Dashboard de Pedidos
+                        </h1>
+                        <p class="text-muted">Gestión completa de pedidos y ventas</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" onclick="recargarDatos()">
+                            <i class="fas fa-sync-alt"></i> Actualizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="dashboard-stats" id="estadisticas-section">
+            <div class="row" id="estadisticas-container">
+                <!-- Las estadísticas se cargarán aquí -->
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filter-section">
+            <div class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label">Estado</label>
+                    <select class="form-select" id="filtro-estado">
+                        <option value="">Todos</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="pagado">Pagado</option>
+                        <option value="listo_retiro">Listo para Retiro</option>
+                        <option value="retirado">Retirado</option>
+                        <option value="preparacion">En Preparación</option>
+                        <option value="enviado">Enviado</option>
+                        <option value="fallido">Fallido</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Método de Pago</label>
+                    <select class="form-select" id="filtro-metodo">
+                        <option value="">Todos</option>
+                        <option value="webpay">WebPay</option>
+                        <option value="transferencia">Transferencia</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Fecha Desde</label>
+                    <input type="date" class="form-control" id="filtro-fecha-desde">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Fecha Hasta</label>
+                    <input type="date" class="form-control" id="filtro-fecha-hasta">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" class="form-control" id="filtro-buscar" placeholder="Pedido, email, dirección...">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button class="btn btn-secondary w-100" onclick="limpiarFiltros()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Pedidos -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header text-white" style="background-color: #003049;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-shopping-bag"></i> Lista de Pedidos
+                            </h5>
+                            <span class="badge bg-light text-dark" id="total-pedidos-badge">0 pedidos</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Loading -->
+                        <div id="loading-pedidos" class="text-center py-5">
+                            <div class="spinner-border" style="color: #780000;" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-2">Cargando pedidos...</p>
+                        </div>
+
+                        <!-- Tabla de pedidos -->
+                        <div id="tabla-pedidos" style="display: none;">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Pedido</th>
+                                            <th>Fecha</th>
+                                            <th>Cliente</th>
+                                            <th>Estado</th>
+                                            <th>Método</th>
+                                            <th>Monto</th>
+                                            <th>Productos</th>
+                                            <th>Entrega</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-pedidos">
+                                        <!-- Los pedidos se cargarán aquí -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Estado vacío -->
+                        <div id="empty-pedidos" class="text-center py-5" style="display: none;">
+                            <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">No se encontraron pedidos</h5>
+                            <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para ver detalles del pedido -->
+<div class="modal fade" id="modalDetallePedido" tabindex="-1" aria-labelledby="modalDetallePedidoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #003049; color: white;">
+                <h5 class="modal-title" id="modalDetallePedidoLabel">
+                    <i class="fas fa-shopping-bag"></i> Detalles del Pedido
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="loading-detalle" class="text-center py-4">
+                    <div class="spinner-border" style="color: #780000;" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando detalles...</p>
+                </div>
+                
+                <div id="contenido-detalle" style="display: none;">
+                    <!-- Información del pedido y cliente -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Información del Pedido</h6>
+                            <p><strong>Pedido:</strong> <span id="detalle-order-id">#</span></p>
+                            <p><strong>Fecha:</strong> <span id="detalle-fecha">-</span></p>
+                            <p><strong>Estado:</strong> <span id="detalle-estado-badge">-</span></p>
+                            <p><strong>Método de Pago:</strong> <span id="detalle-metodo-pago">-</span></p>
+                            <p><strong>Total:</strong> <span id="detalle-total">-</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Información del Cliente</h6>
+                            <p><strong>Email:</strong> <span id="detalle-cliente-email">-</span></p>
+                            <p><strong>Nombre:</strong> <span id="detalle-cliente-nombre">-</span></p>
+                            <p><strong>RUT:</strong> <span id="detalle-cliente-rut">-</span></p>
+                            <p><strong>Tipo:</strong> <span id="detalle-cliente-tipo">-</span></p>
+                            
+                            <!-- Cambiar estado (solo para trabajadores/admin) -->
+                            <div class="mt-3">
+                                <label class="form-label"><strong>Cambiar Estado:</strong></label>
+                                <div class="d-flex gap-2">
+                                    <select class="form-select form-select-sm" id="nuevo-estado" style="max-width: 150px;">
+                                        <option value="pendiente">Pendiente</option>
+                                        <option value="pagado">Pagado</option>
+                                        <option value="listo_retiro">Listo para Retiro</option>
+                                        <option value="retirado">Retirado</option>
+                                        <option value="preparacion">En Preparación</option>
+                                        <option value="enviado">Enviado</option>
+                                        <option value="fallido">Fallido</option>
+                                        <option value="cancelado">Cancelado</option>
+                                    </select>
+                                    <button class="btn btn-sm btn-success" onclick="actualizarEstadoPedido()">
+                                        <i class="fas fa-save"></i> Actualizar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Información de entrega -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Información de Entrega</h6>
+                            <p><strong>Tipo:</strong> <span id="detalle-tipo-entrega">-</span></p>
+                            <div id="detalle-direccion" style="display: none;">
+                                <p><strong>Dirección:</strong><br>
+                                <span id="detalle-direccion-completa">-</span></p>
+                            </div>
+                            <div id="detalle-envio" style="display: none;">
+                                <p><strong>Código de seguimiento:</strong> <span id="detalle-ot-codigo">-</span></p>
+                                <p><strong>Estado de envío:</strong> <span id="detalle-estado-envio">-</span></p>
+                                <p><strong>Peso:</strong> <span id="detalle-peso">-</span></p>
+                                <p><strong>Dimensiones:</strong> <span id="detalle-dimensiones">-</span></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Información de transferencia bancaria -->
+                            <div id="detalle-transferencia" style="display: none;">
+                                <h6 class="text-muted">Información de Transferencia</h6>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Pago Pendiente</strong> - El cliente debe completar la transferencia.
+                                </div>
+                                <div class="card border-primary">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-primary">
+                                            <i class="fas fa-university"></i> Datos Bancarios
+                                        </h6>
+                                        <p><strong>Banco:</strong> <span id="transferencia-banco">-</span></p>
+                                        <p><strong>Cuenta:</strong> <span id="transferencia-numero-cuenta">-</span></p>
+                                        <p><strong>Monto:</strong> <strong class="text-success" id="transferencia-monto">-</strong></p>
+                                        <p><strong>Referencia:</strong> <span id="transferencia-order-id">-</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Productos del pedido -->
+                    <div class="mb-3">
+                        <h6 class="text-muted">Productos del Pedido</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio Unit.</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detalle-productos">
+                                    <!-- Productos se cargarán aquí -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Resumen de costos -->
+                        <div class="row justify-content-end">
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body py-2">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>Subtotal (sin IVA):</span>
+                                            <span id="detalle-subtotal-sin-iva">-</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>IVA (19%):</span>
+                                            <span id="detalle-iva">-</span>
+                                        </div>
+                                        <hr class="my-2">
+                                        <div class="d-flex justify-content-between fw-bold">
+                                            <span>Total:</span>
+                                            <span id="detalle-total-final">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!-- Botones específicos para retiro en tienda -->
+                <div id="botones-retiro" style="display: none;">
+                    <button type="button" class="btn btn-warning me-2" onclick="marcarListoParaRetiro()">
+                        <i class="fas fa-clock"></i> Marcar Listo para Retiro
+                    </button>
+                    <button type="button" class="btn btn-success me-2" onclick="confirmarRetiro()">
+                        <i class="fas fa-check-circle"></i> Confirmar Retiro
+                    </button>
+                </div>
+                
+                <!-- Botones específicos para envío a domicilio -->
+                <div id="botones-envio" style="display: none;">
+                    <button type="button" class="btn btn-info me-2" onclick="marcarEnPreparacion()">
+                        <i class="fas fa-box"></i> Marcar en Preparación
+                    </button>
+                    <button type="button" class="btn btn-primary me-2" onclick="marcarEnviado()">
+                        <i class="fas fa-truck"></i> Marcar como Enviado
+                    </button>
+                </div>
+                
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="text-center">
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="text-light mt-2">Procesando...</p>
+    </div>
+</div>
+<div id="toast-confirmacion-retiro"
+     class="toast align-items-center text-bg-warning border-0 position-fixed top-50 start-50 translate-middle"
+     role="alert" aria-live="assertive" aria-atomic="true"
+     style="z-index:1100; display:none; min-width:300px;">
+  <div class="d-flex">
+    <div class="toast-body">
+      <p class="mb-2">¿Confirmar que el cliente ha retirado el pedido?</p>
+      <div class="text-end">
+        <button type="button" class="btn btn-sm btn-secondary me-2"
+                onclick="cancelarConfirmacionRetiro()">No</button>
+        <button type="button" class="btn btn-sm btn-warning"
+                onclick="ejecutarConfirmacionRetiro()">Sí</button>
+      </div>
+    </div>
+    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+            aria-label="Close" onclick="cancelarConfirmacionRetiro()"></button>
+  </div>
+</div>
+{% include "base/footer.html" %}
+<div id="toast-confirmacion-retiro"
+     class="toast align-items-center text-bg-warning border-0 position-fixed top-50 start-50 translate-middle"
+     role="alert" aria-live="assertive" aria-atomic="true"
+     style="z-index:1100; display:none; min-width:300px;">
+  <div class="d-flex">
+    <div class="toast-body">
+      <p class="mb-2">¿Confirmar que el cliente ha retirado el pedido?</p>
+      <div class="text-end">
+        <button type="button" class="btn btn-sm btn-secondary me-2"
+                onclick="cancelarConfirmacionRetiro()">No</button>
+        <button type="button" class="btn btn-sm btn-warning"
+                onclick="ejecutarConfirmacionRetiro()">Sí</button>
+      </div>
+    </div>
+    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+            aria-label="Close" onclick="cancelarConfirmacionRetiro()"></button>
+  </div>
+</div>
+<!-- Scripts JS principales -->
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'lib/easing/easing.min.js' %}"></script>
+<script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+<script src="{% static 'lib/lightbox/js/lightbox.min.js' %}"></script>
+<script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+
+<!-- Scripts específicos de la página -->
+<script src="{% static 'js/auth_manager.js' %}"></script>
+<script src="{% static 'js/dashboard_pedidos.js' %}"></script>
+<script>
+// 1) Función que muestra el toast
+function mostrarConfirmacionRetiro() {
+  console.log('▶ mostrarConfirmacionRetiro() invoked');
+  const t = document.getElementById('toast-confirmacion-retiro');
+  if (!t) return console.error('❌ toast-confirmacion-retiro no encontrado');
+  // añadir la clase 'show' para que opacity pase a 1, y forzar display
+  t.style.display = 'block';
+  t.classList.add('show');
+}
+
+// 2) Ocultar toast
+function cancelarConfirmacionRetiro() {
+  console.log('▶ cancelarConfirmacionRetiro() invoked');
+  const t = document.getElementById('toast-confirmacion-retiro');
+  if (!t) return;
+  // quitar la clase 'show' deja opacity 0, luego ocultamos
+  t.classList.remove('show');
+  t.style.display = 'none';
+}
+
+// 3) Al pulsar "Sí" en la toast
+async function ejecutarConfirmacionRetiro() {
+  console.log('▶ ejecutarConfirmacionRetiro() invoked');
+  cancelarConfirmacionRetiro();
+  if (!window.dashboardInstance?.currentOrderDetail) {
+    return console.error('❌ No hay pedido seleccionado');
+  }
+  const orderId = window.dashboardInstance.currentOrderDetail.order_id;
+  await cambiarEstadoPedido(orderId, 'retirado', 'Retirado');
+}
+
+// 4) Redefinimos confirmarRetiro para abrir la toast
+async function confirmarRetiro() {
+  console.log('▶ confirmarRetiro() invoked');
+  if (!window.dashboardInstance?.currentOrderDetail) {
+    return console.error('❌ No hay pedido seleccionado');
+  }
+  mostrarConfirmacionRetiro();
+}
+</script>
+
+</body>
+</html>

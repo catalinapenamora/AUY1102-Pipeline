@@ -1,0 +1,693 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Gestión de Categorías | AutoParts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'img/favicon.ico.png' %}" type="image/x-icon">
+
+    <!-- Tipografías y Estilos -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    {% include "base/header.html" %}
+
+    <style>
+        :root {
+            --empresa-rojo: #780000;
+            --empresa-rojo-claro: #a01c1c;
+            --empresa-gris: #64748b;
+            --empresa-gris-claro: #f1f5f9;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, var(--empresa-rojo), var(--empresa-rojo-claro));
+            color: white;
+            padding: 2rem 0;
+            margin-top: 120px;
+            box-shadow: 0 4px 12px rgba(120, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .admin-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .gestion-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+
+        .form-section {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            padding: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .form-title {
+            color: var(--empresa-rojo);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--empresa-rojo-claro);
+            box-shadow: 0 0 0 0.2rem rgba(160, 28, 28, 0.15);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--empresa-rojo);
+            border-color: var(--empresa-rojo);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--empresa-rojo), var(--empresa-rojo-claro));
+            border: none;
+            padding: 12px 24px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #6b0000, #8b0000);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(120, 0, 0, 0.4);
+        }
+
+        .table-container {
+            padding: 2rem;
+        }
+
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, var(--empresa-rojo), var(--empresa-rojo-claro));
+            color: white;
+            border: none;
+            padding: 16px 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        .table tbody td {
+            padding: 16px 12px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .btn-outline-primary {
+            border-color: var(--empresa-rojo-claro);
+            color: var(--empresa-rojo-claro);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--empresa-rojo-claro);
+            border-color: var(--empresa-rojo-claro);
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .badge-success {
+            background-color: #059669 !important;
+        }
+
+        .badge-secondary {
+            background-color: #6c757d !important;
+        }
+
+        /* Modal de confirmación personalizado */
+        .modal-content {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: none;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c82333, #bd2130);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-outline-secondary {
+            border-width: 2px;
+            font-weight: 600;
+            padding: 10px 20px;
+        }
+
+        /* Animación para el ícono de eliminación */
+        .modal.show .fa-trash-alt {
+            animation: trashShake 0.6s ease-in-out;
+        }
+
+        @keyframes trashShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        /* Efecto de fade out para filas que se están eliminando */
+        .fade-out-row {
+            opacity: 0.3;
+            transform: scale(0.98);
+            transition: all 0.5s ease;
+            background-color: #fee !important;
+        }
+
+        /* Efecto de highlight para fila recién agregada/editada */
+        .highlight-row {
+            background-color: #d4edda !important;
+            animation: highlightFade 3s ease-out;
+        }
+
+        @keyframes highlightFade {
+            0% { background-color: #d4edda; }
+            100% { background-color: transparent; }
+        }
+
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+            
+            .form-section {
+                padding: 1.5rem 1rem;
+            }
+            
+            .table-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header administrativo -->
+    <div class="admin-header">
+        <div class="container">
+            <div class="admin-badge">
+                <i class="fas fa-cog me-2"></i>Panel Administrativo
+            </div>
+            <h1 class="mb-0">
+                <i class="fas fa-tags me-3"></i>Gestión de Categorías
+            </h1>
+            <p class="mb-0 mt-2 opacity-75">Administra las categorías del catálogo de AutoParts</p>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="gestion-card">
+                    <!-- Formulario de categorías -->
+                    <div class="form-section">
+                        <h3 class="form-title">
+                            <i class="fas fa-plus-circle"></i>
+                            <span id="form-title-text">Agregar Nueva Categoría</span>
+                        </h3>
+
+                        <form id="form-categoria">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Nombre de la Categoría</label>
+                                    <input name="nombre" placeholder="Ej: Baterías" class="form-control" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Estado</label>
+                                    <div class="form-check mt-2">
+                                        <input type="checkbox" name="activa" class="form-check-input" id="activaCheck" checked>
+                                        <label class="form-check-label fw-bold" for="activaCheck">
+                                            <i class="fas fa-check-circle text-success me-1"></i>Categoría Activa
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-3 d-flex align-items-end">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="limpiarFormulario()">
+                                        <i class="fas fa-times me-1"></i> Limpiar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label fw-bold">Descripción</label>
+                                    <textarea name="descripcion" placeholder="Descripción detallada de la categoría..." class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> 
+                                    <span id="btn-text">Agregar Categoría</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Tabla de categorías -->
+                    <div class="table-container">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="flex-grow-1 text-center">
+                                <h4 class="mb-0 text-primary">
+                                    <i class="fas fa-list me-2"></i>Listado de Categorías
+                                </h4>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="cargarCategorias()">
+                                <i class="fas fa-sync-alt me-1"></i> Actualizar
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Descripción</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="categorias-lista">
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Cargando...</span>
+                                            </div>
+                                            <p class="mt-2 text-muted">Cargando categorías...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar categoría -->
+    <div class="modal fade" id="modalEliminarCategoria" tabindex="-1" aria-labelledby="modalEliminarCategoriaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white border-0">
+                    <h5 class="modal-title" id="modalEliminarCategoriaLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Confirmar Eliminación de Categoría
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="text-center mb-3">
+                        <div class="bg-danger bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-trash-alt fa-2x text-danger"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark">¿Estás seguro de eliminar esta categoría?</h6>
+                        <p class="text-muted mb-0" id="categoria-eliminar-nombre">
+                            Esta acción no se puede deshacer.
+                        </p>
+                    </div>
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>La categoría será eliminada permanentemente. Los productos asociados quedarán sin categoría.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn btn-danger" id="btn-confirmar-eliminar-categoria">
+                        <i class="fas fa-trash me-1"></i> Eliminar Categoría
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include "base/footer.html" %}
+    
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const CSRF_TOKEN = "{{ csrf_token }}";
+        const URL_CATEGORIAS_API = "{% url 'lista_categorias' %}";
+    </script>
+    
+    <script>
+        // Variables globales
+        let editingCategoryId = null;
+        
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            // Remover notificaciones anteriores
+            const notificacionesExistentes = document.querySelectorAll('.alert.position-fixed');
+            notificacionesExistentes.forEach(notif => {
+                if (notif.classList.contains(tipo === 'error' ? 'alert-danger' : 'alert-success')) {
+                    notif.remove();
+                }
+            });
+
+            const notif = document.createElement('div');
+            notif.className = `alert alert-${tipo === 'error' ? 'danger' : 'success'} alert-dismissible fade show position-fixed`;
+            notif.style.top = '130px';
+            notif.style.right = '20px';
+            notif.style.zIndex = '10000';
+            notif.style.minWidth = '300px';
+            notif.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            notif.style.fontWeight = '600';
+            
+            notif.innerHTML = `
+                <i class="fas fa-${tipo === 'error' ? 'exclamation-triangle' : 'check-circle'} me-2"></i>
+                ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notif);
+
+            // Auto-remover después de 4 segundos
+            setTimeout(() => {
+                if (notif.parentNode) {
+                    notif.remove();
+                }
+            }, 4000);
+        }
+
+        function cargarCategorias() {
+            // Mantener la lógica original pero mejorar la presentación
+            fetch(URL_CATEGORIAS_API)
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById("categorias-lista");
+                    tbody.innerHTML = '';
+                    
+                    if (!data || data.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="text-center py-4">
+                                    <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">No hay categorías registradas</p>
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    
+                    data.forEach(categoria => {
+                        const estadoBadge = categoria.activa 
+                            ? '<span class="badge badge-success">Activa</span>'
+                            : '<span class="badge badge-secondary">Inactiva</span>';
+                            
+                        const fila = `
+                            <tr>
+                                <td class="fw-bold text-primary">${categoria.nombre}</td>
+                                <td class="text-muted">${categoria.descripcion || '<em>Sin descripción</em>'}</td>
+                                <td>${estadoBadge}</td>
+                                <td>
+                                    <button class="btn btn-outline-primary btn-sm me-1" onclick="editarCategoria(${categoria.id})" title="Editar categoría">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="confirmarEliminarCategoria(${categoria.id}, '${categoria.nombre}')" title="Eliminar categoría">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += fila;
+                    });
+                })
+                .catch(err => {
+                    console.error("Error cargando categorías:", err);
+                    const tbody = document.getElementById("categorias-lista");
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-danger">
+                                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                                <p>Error al cargar categorías. Por favor, recarga la página.</p>
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+
+        function editarCategoria(id) {
+            // Buscar la categoría en los datos cargados o hacer una nueva consulta
+            fetch(`${URL_CATEGORIAS_API}${id}/`)
+                .then(res => res.json())
+                .then(categoria => {
+                    editingCategoryId = id;
+                    
+                    // Cambiar título y botón
+                    document.getElementById('form-title-text').textContent = 'Editar Categoría';
+                    document.getElementById('btn-text').textContent = 'Actualizar Categoría';
+                    document.querySelector('.form-title i').className = 'fas fa-edit';
+
+                    // Llenar campos
+                    const form = document.getElementById('form-categoria');
+                    form.nombre.value = categoria.nombre || '';
+                    form.descripcion.value = categoria.descripcion || '';
+                    form.activa.checked = categoria.activa || false;
+                    
+                    // Scroll al formulario
+                    document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+                    
+                    mostrarNotificacion('Categoría cargada para edición', 'success');
+                })
+                .catch(err => {
+                    console.error('Error al cargar categoría para editar:', err);
+                    mostrarNotificacion('Error al cargar la categoría para editar', 'error');
+                });
+        }
+
+        function limpiarFormulario() {
+            const form = document.getElementById('form-categoria');
+            form.reset();
+            form.activa.checked = true; // Por defecto activa
+            editingCategoryId = null;
+            
+            // Restaurar título y botón
+            document.getElementById('form-title-text').textContent = 'Agregar Nueva Categoría';
+            document.getElementById('btn-text').textContent = 'Agregar Categoría';
+            document.querySelector('.form-title i').className = 'fas fa-plus-circle';
+        }
+
+        function confirmarEliminarCategoria(id, nombre) {
+            // Configurar el modal con la información de la categoría
+            document.getElementById('categoria-eliminar-nombre').innerHTML = `
+                <strong class="text-danger">"${nombre}"</strong><br>
+                <small class="text-muted">Esta acción no se puede deshacer.</small>
+            `;
+            
+            // Configurar el botón de confirmación
+            const btnConfirmar = document.getElementById('btn-confirmar-eliminar-categoria');
+            btnConfirmar.onclick = function() {
+                ejecutarEliminacionCategoria(id, nombre);
+            };
+            
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById('modalEliminarCategoria'));
+            modal.show();
+        }
+
+        function ejecutarEliminacionCategoria(id, nombre) {
+            // Cerrar el modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminarCategoria'));
+            modal.hide();
+            
+            // Encontrar y animar la fila
+            const btnEliminar = document.querySelector(`button[onclick="confirmarEliminarCategoria(${id}, '${nombre}')"]`);
+            const fila = btnEliminar ? btnEliminar.closest('tr') : null;
+            
+            if (btnEliminar) {
+                btnEliminar.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btnEliminar.disabled = true;
+            }
+            
+            if (fila) {
+                fila.classList.add('fade-out-row');
+            }
+
+            // Usar la lógica original pero con mejor feedback
+            fetch(`${URL_CATEGORIAS_API}${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN,
+                }
+            })
+            .then(res => {
+                if (res.ok) {
+                    mostrarNotificacion(`Categoría "${nombre}" eliminada exitosamente`, 'success');
+                    
+                    // Animar la eliminación de la fila
+                    if (fila) {
+                        fila.style.opacity = '0';
+                        fila.style.transform = 'translateX(-100%)';
+                        setTimeout(() => {
+                            cargarCategorias();
+                        }, 500);
+                    } else {
+                        cargarCategorias();
+                    }
+                } else {
+                    throw new Error(`Error ${res.status}`);
+                }
+            })
+            .catch(err => {
+                console.error('Error al eliminar categoría:', err);
+                mostrarNotificacion('Error al eliminar la categoría', 'error');
+                
+                // Restaurar apariencia de la fila en caso de error
+                if (fila) {
+                    fila.classList.remove('fade-out-row');
+                }
+                if (btnEliminar) {
+                    btnEliminar.innerHTML = '<i class="fas fa-trash"></i>';
+                    btnEliminar.disabled = false;
+                }
+            });
+        }
+
+        // Manejar envío del formulario
+        document.getElementById('form-categoria').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            // Convertir checkbox a booleano
+            formData.set('activa', form.activa.checked);
+            
+            const url = editingCategoryId ? `${URL_CATEGORIAS_API}${editingCategoryId}/` : URL_CATEGORIAS_API;
+            const method = editingCategoryId ? 'PUT' : 'POST';
+            
+            // Mostrar indicador de carga
+            const btnSubmit = form.querySelector('button[type="submit"]');
+            const originalText = btnSubmit.innerHTML;
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Guardando...';
+            btnSubmit.disabled = true;
+
+            fetch(url, {
+                method,
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN,
+                },
+                body: formData,
+            })
+            .then(res => {
+                if (res.ok) {
+                    mostrarNotificacion(
+                        editingCategoryId ? 'Categoría actualizada exitosamente' : 'Categoría agregada exitosamente',
+                        'success'
+                    );
+                    limpiarFormulario();
+                    cargarCategorias();
+                } else {
+                    throw new Error(`Error ${res.status}`);
+                }
+            })
+            .catch(err => {
+                console.error('Error al guardar categoría:', err);
+                mostrarNotificacion('Error al guardar la categoría', 'error');
+            })
+            .finally(() => {
+                // Restaurar botón
+                btnSubmit.innerHTML = originalText;
+                btnSubmit.disabled = false;
+            });
+        });
+
+        // Configurar eventos del modal
+        document.addEventListener('DOMContentLoaded', () => {
+            const modalEliminarCategoria = document.getElementById('modalEliminarCategoria');
+            
+            // Focus automático en el botón cancelar cuando se abre el modal
+            modalEliminarCategoria.addEventListener('shown.bs.modal', function () {
+                const btnCancelar = modalEliminarCategoria.querySelector('.btn-outline-secondary');
+                btnCancelar.focus();
+            });
+            
+            // Limpiar contenido cuando se cierra el modal
+            modalEliminarCategoria.addEventListener('hidden.bs.modal', function () {
+                document.getElementById('categoria-eliminar-nombre').innerHTML = 'Esta acción no se puede deshacer.';
+                const btnConfirmar = document.getElementById('btn-confirmar-eliminar-categoria');
+                btnConfirmar.onclick = null;
+            });
+            
+            // Cargar categorías al inicio
+            cargarCategorias();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1728 @@
+{% load static %}
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+        <title>AutoParts</title>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <meta content="" name="keywords">
+        <meta content="" name="description">
+         <!-- Favicon -->
+        <link rel="icon" href="{% static 'img/favicon.ico.png' %}" type="image/x-icon"> 
+        <!-- Google Web Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&amp;family=Raleway:wght@600;800&amp;display=swap" rel="stylesheet"> 
+
+        <!-- Icon Font Stylesheet -->
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+        <!-- Libraries Stylesheet -->
+        <link href="{% static 'lib/lightbox/css/lightbox.min.css' %}" rel="stylesheet">
+        <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+
+        <!-- Customized Bootstrap Stylesheet -->
+        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+
+        <!-- Template Stylesheet -->
+        <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+        <!-- Select2 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        
+        <!-- Font Awesome para iconos -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        
+        {% include "base/header.html" %}
+</head>
+
+<body>
+    <main style="padding-top: 180px;">
+      <div class="container">
+        <div class="col-md-10 col-lg-8 mx-auto">
+          <!-- Sección para información del usuario/invitado -->
+          <div class="perfil-section mb-3">
+            <!-- Contenido dinámico agregado por JS -->
+          </div>
+          
+          <div class="rounded position-relative shadow-sm p-4 carrito-card">
+            <h3 class="mb-4 text-center">Tu Carrito</h3>
+            <div id="mensaje-vacio" style="display: none;">Tu carrito está vacío 🛒</div>
+            <table class="table table-striped table-bordered mt-4">
+              <thead class="table-dark">
+                <tr>
+                  <th>Producto</th>
+                  <th>Precio</th>
+                  <th>Cantidad</th>
+                  <th>Subtotal</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="carrito-body">
+                <!-- Productos cargados aquí por JavaScript -->
+              </tbody>
+            </table>
+
+            <!-- Resumen del carrito -->
+            <div class="text-end mt-3">
+              <div id="resumen-carrito" class="border-top pt-3">
+                <div class="row">
+                  <div class="col-8 text-end"><strong>Subtotal:</strong></div>
+                  <div class="col-4 text-end" id="subtotal-carrito">$0</div>
+                </div>
+                <div class="row">
+                  <div class="col-8 text-end"><strong>IVA (19%):</strong></div>
+                  <div class="col-4 text-end" id="iva-carrito">$0</div>
+                </div>
+                <div class="row" id="envio-row" style="display: none;">
+                  <div class="col-8 text-end"><strong>Envío:</strong></div>
+                  <div class="col-4 text-end" id="envio-carrito">$0</div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-8 text-end"><h4><strong>Total:</strong></h4></div>
+                  <div class="col-4 text-end"><h4 id="total-carrito"><strong>$0</strong></h4></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Campo oculto con email -->
+            <input type="hidden" id="userEmail" value="{{ request.user.email }}">
+            
+            <select id="metodoPago" class="form-select mb-3">
+              <option value="">Selecciona un método</option>
+              <option value="tarjeta">Tarjeta (Webpay)</option>
+              <option value="transferencia">Transferencia </option>
+            </select>
+            <div class="mb-3">
+              <label class="form-label">¿Cómo deseas recibir tu pedido?</label><br>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="tipo_entrega" id="retiro" value="retiro">
+                <label class="form-check-label" for="retiro">Retiro en tienda</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="tipo_entrega" id="envio" value="envio">
+                <label class="form-check-label" for="envio">Envío a domicilio</label>
+              </div>
+            </div>
+
+            <!-- Formulario de envío (oculto por defecto) -->
+            <div id="envioContainer" style="display: none;">
+              <div class="card p-3 mb-3">
+                <h5 class="mb-3">Datos para envío</h5>
+                <div class="row">
+                  <div class="col-md-12 mb-2">
+                    <input id="direccion" name="direccion" class="form-control" placeholder="Dirección completa de entrega" required>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <select id="region" name="region" class="form-control" required>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <select id="comuna" name="comuna" class="form-control" required>
+                      <option value="">Selecciona una comuna</option>
+                      <!-- Las comunas se cargarán aquí por JavaScript -->
+                    </select>
+                  </div>
+                  <div class="col-md-12 mb-2">
+                    <input name="telefono" class="form-control" placeholder="Teléfono de contacto" required>
+                  </div>
+                  <div class="col-md-12">
+                    <button id="calcularEnvio" type="button" class="btn btn-outline-success">
+                      <i class="fas fa-calculator"></i> Calcular costo de envío
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contenedor para opciones de envío -->
+            <div id="shippingOptions" class="mb-3">
+              <!-- Las opciones de envío aparecerán aquí -->
+            </div>
+
+            <!-- Resumen del pedido -->
+            <!-- <div id="resumen-carrito" class="card p-3 mb-3" style="display: none;">
+              <h5 class="mb-3">Resumen del pedido</h5>
+              <div class="d-flex justify-content-between">
+                <span>Subtotal:</span>
+                <span id="subtotal-carrito">$0</span>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>IVA (19%):</span>
+                <span id="iva-carrito">$0</span>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Costo de envío:</span>
+                <span id="envio-carrito">$0</span>
+              </div>
+              <hr>
+              <div class="d-flex justify-content-between">
+                <strong>Total:</strong>
+                <strong id="total-carrito">$0</strong>
+              </div>
+            </div> -->
+
+            <!-- Datos para transferencia -->
+            <div id="datos-transferencia" style="display: none;" class="card p-3 mb-3">
+              <h5>Datos para Transferencia</h5>
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong>Banco:</strong> Banco Santander</p>
+                  <p><strong>Cuenta:</strong> 0 000 85 73422 9</p>
+                  <p><strong>Tipo:</strong> Corriente</p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Titular:</strong> Autoparts SPA</p>
+                  <p><strong>RUT:</strong> 20.654.445-7</p>
+                  <p><strong>Email:</strong> ventas.autoparts.2025@gmail.com</p>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex justify-content-end align-items-center">
+              <button id="btnConfirmarPago" class="btn btn-success">Ir a pagar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    {% include "base/footer.html" %}
+<!-- Contenedor opcional si quieres agrupar varios toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+  <!-- Toast de éxito -->
+  <div id="alerta-carrito"
+       class="toast align-items-center text-bg-success border-0 fade"
+       role="alert"
+       aria-live="assertive"
+       aria-atomic="true"
+       data-bs-delay="2500">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="fa fa-check-circle me-2"></i> Producto agregado al carrito
+      </div>
+      <button type="button"
+              class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast"
+              aria-label="Close"></button>
+    </div>
+  </div>
+
+  <!-- Toast de error -->
+  <div id="alerta-stock"
+       class="toast align-items-center text-bg-danger border-0 fade"
+       role="alert"
+       aria-live="assertive"
+       aria-atomic="true"
+       data-bs-delay="2500">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="fa fa-exclamation-triangle me-2"></i> No hay suficiente stock disponible
+      </div>
+      <button type="button"
+              class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast"
+              aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+    <!-- Scripts específicos de la página -->
+    <script src="{% static 'js/auth.js' %}"></script>
+    <script>// 🚨 Notificaciones estilizadas
+// ------------------------------
+// Notificación flotante
+// ------------------------------
+function mostrarNotificacion(mensaje, tipo = 'success') {
+  const notif = document.createElement('div');
+  notif.className = `alert alert-${tipo==='error'?'danger':'success'} position-fixed`;
+  notif.style.top        = '120px';
+  notif.style.right      = '20px';
+  notif.style.left       = '20px';
+  notif.style.maxWidth   = '400px';
+  notif.style.margin     = '0 auto';
+  notif.style.zIndex     = '10000';
+  notif.style.boxShadow  = '0 4px 12px rgba(0, 0, 0, 0.15)';
+  notif.style.borderRadius   = '8px';
+  notif.style.fontWeight     = '600';
+  notif.style.textAlign      = 'center';
+  notif.innerHTML = `
+    <i class="fas fa-${tipo==='error'?'exclamation-triangle':'check-circle'} me-2"></i>
+    ${mensaje}
+  `;
+
+  // Ajustes móviles
+  if (window.innerWidth <= 768) {
+    notif.style.top      = '100px';
+    notif.style.right    = '10px';
+    notif.style.left     = '10px';
+    notif.style.fontSize = '0.9rem';
+  }
+
+  document.body.appendChild(notif);
+  setTimeout(() => {
+    notif.style.opacity    = '0';
+    notif.style.transform  = 'translateY(-20px)';
+    notif.style.transition = 'all 0.3s ease-out';
+    setTimeout(() => notif.remove(), 300);
+  }, 3000);
+}
+
+function formatPrice(price) {
+    return `$${Math.round(price).toLocaleString('es-CL')}`;
+}
+
+// Variables globales para el envío
+window.costoEnvioSeleccionado = 0;
+window.opcionesEnvio = null;
+window.opcionEnvioSeleccionada = null;
+
+document.addEventListener("DOMContentLoaded", async () => {
+  console.log("🔍 CARRITO: Iniciando carga de página del carrito");
+  
+  // Esperar a que AuthManager esté disponible
+  if (!window.authManager) {
+    console.log("⏳ CARRITO: Esperando AuthManager...");
+    await new Promise(resolve => {
+      const checkAuthManager = () => {
+        if (window.authManager) {
+          resolve();
+        } else {
+          setTimeout(checkAuthManager, 100);
+        }
+      };
+      checkAuthManager();
+    });
+  }
+  
+  console.log("✅ CARRITO: AuthManager disponible");
+  
+  // Verificar si el usuario está autenticado
+  const isAuthenticated = await window.authManager.isAuthenticated();
+  console.log("🔍 CARRITO: Usuario autenticado:", isAuthenticated);
+  
+  if (isAuthenticated) {
+    // Usuario autenticado - migrar carrito de invitado si existe
+    await window.authManager.migrarCarritoInvitado();
+    await inicializarCarritoAutenticado();
+  } else {
+    // Usuario invitado - mostrar carrito local
+    await inicializarCarritoInvitado();
+  }
+
+  // Configurar evento para el botón "Ir a pagar"
+  const btnConfirmarPago = document.getElementById("btnConfirmarPago");
+  if (btnConfirmarPago) {
+    btnConfirmarPago.addEventListener("click", async () => {
+      await finalizarCompra();
+    });
+  }
+
+  // Escuchar cambios en el estado de autenticación (por ejemplo, después del login)
+  window.addEventListener('storage', async (e) => {
+    if (e.key === 'token') {
+      // El token cambió, recargar la página del carrito
+      console.log("🔄 Token cambió, recargando carrito...");
+      location.reload();
+    }
+  });
+
+  // También escuchar eventos personalizados de login
+  window.addEventListener('userLoggedIn', async () => {
+    console.log("🔄 Usuario logueado, recargando carrito...");
+    location.reload();
+  });
+
+  // Inicializar estado de campos de envío
+  toggleCamposEnvio(false);
+  
+  // Agregar event listener para el método de pago
+  const metodoPagoSelect = document.getElementById("metodoPago");
+  if (metodoPagoSelect) {
+    metodoPagoSelect.addEventListener("change", (e) => {
+      const metodoSeleccionado = e.target.value;
+      console.log("🔍 CARRITO: Método de pago cambiado a:", metodoSeleccionado);
+      
+      // Mostrar/ocultar información de transferencia
+      const datosTransferencia = document.getElementById("datos-transferencia");
+      if (datosTransferencia) {
+        if (metodoSeleccionado === "transferencia") {
+          datosTransferencia.style.display = "block";
+          console.log("📄 CARRITO: Mostrando datos de transferencia");
+        } else {
+          datosTransferencia.style.display = "none";
+          console.log("📄 CARRITO: Ocultando datos de transferencia");
+        }
+      }
+    });
+  }
+});
+
+async function inicializarCarritoAutenticado() {
+  // Mostrar información del usuario autenticado
+  await mostrarInformacionUsuario();
+
+  // Evento de logout usando AuthManager
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      await window.authManager.cerrarSesion();
+    });
+  }
+
+  // Cargar carrito autenticado
+  await cargarCarritoAutenticado();
+}
+
+async function mostrarInformacionUsuario() {
+  try {
+    // Obtener información del perfil del usuario
+    const token = await window.authManager.getTokenIfAvailable();
+    if (token) {
+      const perfil = await window.authManager.obtenerPerfil(token);
+      
+      const perfilSection = document.querySelector('.perfil-section');
+      if (perfilSection && perfil) {
+        perfilSection.innerHTML = `
+          <div class="alert alert-success text-center">
+            <h5><i class="fas fa-user-check"></i> Usuario: ${perfil.usuario}</h5>
+            <p><i class="fas fa-envelope"></i> ${perfil.email}</p>
+            <p class="mb-0">¡Tu carrito se guarda automáticamente!</p>
+          </div>
+        `;
+      }
+    }
+  } catch (error) {
+    console.error("Error al mostrar información del usuario:", error);
+  }
+}
+
+async function inicializarCarritoInvitado() {
+  // Mostrar mensaje de invitado
+  mostrarMensajeInvitado();
+  
+  // Cargar carrito de invitado
+  await cargarCarritoInvitado();
+}
+
+function mostrarMensajeInvitado() {
+  // Buscar un contenedor para mostrar el mensaje
+  const perfilSection = document.querySelector('.perfil-section');
+  if (perfilSection) {
+    perfilSection.innerHTML = `
+      <div class="alert alert-info text-center">
+        <h5><i class="fas fa-user-guest"></i> Carrito de Invitado</h5>
+        <p>Para finalizar tu compra necesitas <a href="/login/" class="alert-link">iniciar sesión</a></p>
+        <p>¿No tienes cuenta? <a href="/registro/" class="alert-link">Regístrate aquí</a></p>
+      </div>
+    `;
+  }
+}
+
+async function cargarCarritoAutenticado() {
+  try {
+    const res = await window.authManager.fetchAutenticado("/api/carrito/");
+    if (!res.ok) throw new Error("Error al obtener el carrito");
+
+    const data = await res.json();
+    const carrito = data.carrito;
+    
+    mostrarCarrito(carrito, 'authenticated');
+
+  } catch (err) {
+    console.error("❌ Error cargando carrito autenticado:", err);
+  }
+}
+
+async function cargarCarritoInvitado() {
+  console.log("🔍 CARRITO: Cargando carrito de invitado");
+  try {
+    const carrito = await window.authManager.obtenerCarritoInvitado();
+    console.log("🔍 CARRITO: Carrito de invitado obtenido:", carrito);
+    mostrarCarrito(carrito, 'guest');
+  } catch (err) {
+    console.error("❌ Error cargando carrito de invitado:", err);
+  }
+}
+
+function mostrarCarrito(carrito, tipo) {
+  console.log("🔍 CARRITO: Mostrando carrito", { carrito, tipo });
+  const tbody = document.getElementById("carrito-body");
+  const mensajeVacio = document.getElementById("mensaje-vacio");
+
+  if (!tbody) {
+    console.error("❌ No se encontró el elemento carrito-body");
+    return;
+  }
+
+  console.log("🔍 CARRITO: Elemento tbody encontrado:", tbody);
+  tbody.innerHTML = "";
+
+  if (carrito.length === 0) {
+    console.log("🔍 CARRITO: Carrito vacío, mostrando mensaje");
+    if (mensajeVacio) mensajeVacio.style.display = "block";
+    
+    // Actualizar resumen del carrito a valores vacíos
+    actualizarResumenCarrito(0, 0, 0, 0);
+    
+    // Limpiar opciones de envío
+    window.costoEnvioSeleccionado = 0;
+    window.opcionesEnvio = null;
+    window.opcionEnvioSeleccionada = null;
+    
+    return;
+  }
+
+  console.log("🔍 CARRITO: Carrito tiene", carrito.length, "productos");
+  if (mensajeVacio) mensajeVacio.style.display = "none";
+
+  carrito.forEach(item => {
+    const fila = document.createElement("tr");
+    
+    if (tipo === 'authenticated') {
+      fila.innerHTML = `
+        <td>${item.producto}</td>
+        <td>
+          <div class="price-info">
+            <strong>${formatPrice(item.precio)}</strong><br>
+            <small class="text-muted">IVA incluido</small>
+          </div>
+        </td>
+        <td>
+          <div class="cantidad-control">
+            <button class="btn-cantidad" onclick="cambiarCantidadAutenticado(${item.producto_id}, -1)">-</button>
+            <span>${item.cantidad}</span>
+            <button class="btn-cantidad" onclick="cambiarCantidadAutenticado(${item.producto_id}, 1)">+</button>
+          </div>
+        </td>
+        <td>
+          <div class="price-info">
+            <strong>${formatPrice(item.precio * item.cantidad)}</strong><br>
+            <small class="text-muted">IVA incluido</small>
+          </div>
+        </td>
+        <td>
+          <button class="btn btn-eliminar btn-sm" onclick="eliminarProductoAutenticado(${item.producto_id})">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      `;
+    } else {
+      fila.innerHTML = `
+        <td>${item.producto.nombre}</td>
+        <td>
+          <div class="price-info">
+            <strong>${formatPrice(item.producto.precio)}</strong><br>
+            <small class="text-muted">IVA incluido</small>
+          </div>
+        </td>
+        <td>
+          <div class="cantidad-control">
+            <button class="btn-cantidad" onclick="cambiarCantidadInvitado(${item.id}, -1)">-</button>
+            <span>${item.cantidad}</span>
+            <button class="btn-cantidad" onclick="cambiarCantidadInvitado(${item.id}, 1)">+</button>
+          </div>
+        </td>
+        <td>
+          <div class="price-info">
+            <strong>${formatPrice(item.subtotal)}</strong><br>
+            <small class="text-muted">IVA incluido</small>
+          </div>
+        </td>
+        <td>
+          <button class="btn btn-eliminar btn-sm" onclick="eliminarProductoInvitado(${item.id})">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      `;
+      ;
+    }
+    
+    tbody.appendChild(fila);
+  });
+
+  // Calcular totales con IVA y envío
+  const { subtotal, iva, costoEnvio, total } = calcularTotalesCarrito(carrito);
+  
+  // Actualizar elementos en el DOM
+  actualizarResumenCarrito(subtotal, iva, costoEnvio, total);
+
+  // Mostrar/ocultar botón de compra según el tipo
+  const btnCompra = document.getElementById("btn-finalizar-compra");
+  if (btnCompra) {
+    
+    const stock = item.producto.stock;       // el ProductoSerializer ya te devuelve stock
+    const cantidad = item.cantidad;
+    const btnMas = fila.querySelector('button[onclick*="cambiarCantidadInvitado"]');
+  }
+if (tipo === 'guest') {
+  const stock    = parseInt(fila.dataset.stock, 10);
+  const cantidad = item.cantidad;
+  const btnMas   = fila.querySelector('button[onclick*="cambiarCantidadInvitado"]');
+  if (cantidad >= stock) {
+    console.log("🔒 CARRITO: Cantidad máxima alcanzada, deshabilitando botón +");
+    mostrarNotificacion('No hay suficiente stock disponible', 'error');
+    btnMas.disabled = true;
+    btnMas.classList.add('disabled');
+  }
+}
+
+  // Agregar event listeners para actualizar totales cuando cambie el tipo de entrega
+  const tipoEntregaInputs = document.querySelectorAll('input[name="tipo_entrega"]');
+  tipoEntregaInputs.forEach(input => {
+    input.addEventListener('change', () => {
+      // Mostrar/ocultar campos de dirección
+      toggleCamposEnvio(input.value === 'envio');
+      
+      // Si cambia a "retiro", limpiar costo de envío y opciones
+      if (input.value === 'retiro') {
+        window.costoEnvioSeleccionado = 0;
+        window.opcionesEnvio = null;
+        window.opcionEnvioSeleccionada = null;
+        
+        // Limpiar opciones de envío mostradas
+        const shippingOptions = document.getElementById("shippingOptions");
+        if (shippingOptions) {
+          shippingOptions.innerHTML = `
+            <div class="alert alert-info" role="alert">
+              <i class="fas fa-store"></i> Has seleccionado retiro en tienda. No se aplicarán costos de envío.
+            </div>
+          `;
+        }
+      } else if (input.value === 'envio') {
+        // Si cambia a envío, mostrar mensaje para calcular
+        const shippingOptions = document.getElementById("shippingOptions");
+        if (shippingOptions && !window.opcionesEnvio) {
+          shippingOptions.innerHTML = `
+            <div class="alert alert-warning" role="alert">
+              <i class="fas fa-calculator"></i> Completa los datos de dirección y haz clic en "Calcular costo de envío" para ver las opciones disponibles.
+            </div>
+          `;
+        }
+      }
+      
+      // Recalcular totales
+      if (window.carritoActual) {
+        const { subtotal, iva, costoEnvio, total } = calcularTotalesCarrito(window.carritoActual);
+        actualizarResumenCarrito(subtotal, iva, costoEnvio, total);
+      }
+    });
+  });
+
+  // NO agregar event listeners automáticos para campos de dirección
+  // Esto causaba que se reseteara el costo cada vez que el usuario escribía
+  // El cálculo se hará solo cuando el usuario haga clic en "Calcular envío"
+
+  // Agregar event listener para el botón de calcular envío
+  const btnCalcularEnvio = document.getElementById("calcularEnvio");
+  if (btnCalcularEnvio) {
+    btnCalcularEnvio.addEventListener('click', () => {
+      calcularCostoEnvio();
+    });
+  }
+
+  // Guardar referencia al carrito actual para recálculos
+  window.carritoActual = carrito;
+}
+
+// Funciones para carrito autenticado
+async function cambiarCantidadAutenticado(productoId, cambio) {
+  try {
+    const endpoint = cambio > 0 ? "aumentar" : "disminuir";
+    const response = await window.authManager.fetchAutenticado(`/api/carrito/${endpoint}/${productoId}/`, {
+      method: 'POST'
+    });
+    
+    if (response.ok) {
+      await cargarCarritoAutenticado();
+      await window.authManager.actualizarContadorCarrito();
+    } else {
+      // Mostrar el mensaje de error que envía el backend
+      mostrarNotificacion('No hay suficiente stock disponible', 'error');
+      return;
+      alert(err.error || "No se pudo actualizar la cantidad");
+      // Recargar para que la UI vuelva al valor real
+      await cargarCarritoAutenticado();
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+async function eliminarProductoAutenticado(productoId) {
+  try {
+    const response = await window.authManager.fetchAutenticado(`/api/carrito/remover/${productoId}/`, {
+      method: 'POST'
+    });
+
+    if (response.ok) {
+      await cargarCarritoAutenticado(); // Recargar carrito
+      await window.authManager.actualizarContadorCarrito();
+    } else {
+      console.error("Error al eliminar producto");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+// Funciones para carrito de invitado
+function cambiarCantidadInvitado(productoId, cambio) {
+  const carritoLocal   = JSON.parse(localStorage.getItem("carrito_invitado") || "{}");
+  const actual         = carritoLocal[productoId] || 0;
+  const nuevaCantidad  = actual + cambio;
+
+  // Capturamos stock del <tr data-stock>
+  const row   = document.querySelector(`#carrito-body tr[data-id="${productoId}"]`);
+  const stock = row ? parseInt(row.dataset.stock, 10) : Infinity;
+
+  if (nuevaCantidad > stock) {
+    // Aquí invocamos tu toast de error
+    bootstrap.Toast.getOrCreateInstance(
+  document.getElementById('alerta-carrito')
+).show();
+    return;
+  }
+
+  window.authManager.actualizarCantidadCarritoLocal(productoId, nuevaCantidad);
+  cargarCarritoInvitado();
+}
+
+
+
+function eliminarProductoInvitado(productoId) {
+  window.authManager.eliminarDelCarritoLocal(productoId);
+  cargarCarritoInvitado(); // Recargar carrito
+}
+
+async function finalizarCompra() {
+  try {
+    // Validar formulario antes de proceder
+    if (!validarFormularioCompra()) {
+      return; // No proceder si la validación falla
+    }
+
+    // Verificar que el usuario está autenticado
+    const isAuthenticated = await window.authManager.ensureAuthenticated();
+    if (!isAuthenticated) {
+      mostrarNotificacion('Debes iniciar sesión para finalizar la compra', 'error');
+      return;
+      
+    }
+
+    // Migrar carrito de invitado si existe
+    await window.authManager.migrarCarritoInvitado();
+
+    // Verificar que hay productos en el carrito
+    const carrito = await obtenerCarritoActual();
+    if (!carrito || carrito.length === 0) {
+      mostrarNotificacion('No hay productos en el carrito', 'error');
+      return;
+    }
+
+    // Calcular total del carrito con IVA y envío (forzar cálculo de envío para el pedido final)
+    const { total } = calcularTotalesCarrito(carrito, true);
+    
+    // Obtener datos del formulario
+    const metodoPago = document.getElementById("metodoPago").value;
+    const tipoEntrega = document.querySelector('input[name="tipo_entrega"]:checked').value;
+    
+    console.log("🔍 CARRITO: Método de pago seleccionado:", metodoPago);
+    console.log("🔍 CARRITO: Tipo de entrega seleccionado:", tipoEntrega);
+    
+    // Obtener email del usuario
+    const token = await window.authManager.asegurarToken();
+    const perfilResponse = await fetch("/api/perfil/", {
+      headers: { "Authorization": `Token ${token}` }
+    });
+    
+    let email = "usuario@ejemplo.com"; // valor por defecto
+    if (perfilResponse.ok) {
+      const perfil = await perfilResponse.json();
+      email = perfil.email || email;
+    }
+
+    // Preparar datos del pedido
+    const datosCrearPedido = {
+      email: email,
+      monto: total,
+      metodo_pago: metodoPago,
+      tipo_entrega: tipoEntrega
+    };
+
+    // Si es envío, agregar datos de dirección y opción de envío seleccionada
+    if (tipoEntrega === 'envio') {
+      // Validar que se haya calculado el envío
+      if (!window.costoEnvioSeleccionado || window.costoEnvioSeleccionado <= 0) {
+        alert("Debes calcular el costo de envío antes de finalizar la compra");
+        return;
+      }
+      
+      datosCrearPedido.direccion = document.getElementById("direccion").value;
+      datosCrearPedido.comuna = document.getElementById("comuna").value;
+      datosCrearPedido.region = document.getElementById("region").value;
+      datosCrearPedido.codigo_comuna_chilexpress = "13101"; // Por ahora fijo
+      datosCrearPedido.costo_envio = window.costoEnvioSeleccionado;
+      
+      // Si hay una opción específica seleccionada, incluir sus datos
+      if (window.opcionEnvioSeleccionada) {
+        datosCrearPedido.opcion_envio = window.opcionEnvioSeleccionada;
+      }
+    }
+
+    console.log("🔍 CARRITO: Creando pedido con datos:", datosCrearPedido);
+
+    // Decidir qué endpoint usar según el método de pago
+    let endpoint = "/crear_pedido/";
+    if (metodoPago === "transferencia") {
+      endpoint = "/api/crear-pedido-transferencia/";
+    }
+
+    const response = await window.authManager.fetchAutenticado(endpoint, {
+      method: "POST",
+      body: JSON.stringify(datosCrearPedido)
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const orderId = data.order_id;
+      
+      console.log("✅ CARRITO: Pedido creado exitosamente con ID:", orderId);
+      
+      // Manejar redirección según método de pago
+      if (metodoPago === "transferencia") {
+        // Para transferencia, redirigir a página de datos bancarios
+        console.log("✅ CARRITO: Método transferencia detectado, redirigiendo a página de transferencia...");
+        console.log("✅ CARRITO: URL de redirección:", `/pago-transferencia/${orderId}/`);
+        window.location.href = `/pago-transferencia/${orderId}/`;
+      } else {
+        // Para tarjeta, redirigir a Transbank
+        console.log("✅ CARRITO: Método tarjeta detectado, redirigiendo a Transbank...");
+        console.log("✅ CARRITO: URL de redirección:", `/pagar/${orderId}/`);
+        window.location.href = `/pagar/${orderId}/`;
+      }
+    } else {
+      const errorData = await response.json();
+      console.error("❌ CARRITO: Error al crear pedido:", errorData);
+      alert(`Error al crear el pedido: ${errorData.error || "Error desconocido"}`);
+    }
+  } catch (error) {
+    console.error("❌ CARRITO: Error al finalizar compra:", error);
+    alert("Error al procesar la compra. Por favor, intenta nuevamente.");
+  }
+}
+
+async function obtenerCarritoActual() {
+  const isAuthenticated = await window.authManager.isAuthenticated();
+  if (isAuthenticated) {
+    try {
+      const res = await window.authManager.fetchAutenticado("/api/carrito/");
+      if (res.ok) {
+        const data = await res.json();
+        return data.carrito;
+      }
+    } catch (error) {
+      console.error("Error al obtener carrito autenticado:", error);
+    }
+  } else {
+    return await window.authManager.obtenerCarritoInvitado();
+  }
+  return [];
+}
+
+async function procesarPago() {
+  console.log("🔍 CARRITO: Procesando pago...");
+  
+  // Verificar autenticación
+  const isAuthenticated = await window.authManager.isAuthenticated();
+  if (!isAuthenticated) {
+    mostrarNotificacion('Debes iniciar sesión para realizar el pago', 'error');
+    setTimeout(() => {
+    window.location.href = "/login/";
+  }, 10000);
+    return;
+  }
+
+  // Verificar que hay productos en el carrito
+  const carrito = await obtenerCarritoActual();
+  if (!carrito || carrito.length === 0) {
+    mostrarNotificacion('No hay productos en el carrito para procesar el pago', 'error');
+    return;
+  }
+
+  // Verificar que se seleccionó un método de pago
+  const metodoPago = document.getElementById("metodoPago").value;
+  if (!metodoPago) {
+    mostrarNotificacion('Por favor selecciona un método de pago', 'error');
+    return;
+  }
+
+  // Verificar tipo de entrega
+  const tipoEntrega = document.querySelector('input[name="tipo_entrega"]:checked');
+  if (!tipoEntrega) {
+    mostrarNotificacion('Por favor selecciona el tipo de entrega', 'error');
+    return;
+  }
+
+  try {
+    // Construir datos del pedido
+    const datosEnvio = {};
+    if (tipoEntrega.value === "envio") {
+      datosEnvio.direccion = document.getElementById("direccion").value;
+      datosEnvio.region = document.getElementById("region").value;
+      datosEnvio.comuna = document.getElementById("comuna").value;
+      datosEnvio.telefono = document.querySelector('input[name="telefono"]').value;
+      
+      if (!datosEnvio.direccion || !datosEnvio.region || !datosEnvio.comuna || !datosEnvio.telefono) {
+        mostrarNotificacion('Por favor completa todos los datos de envío', 'error');
+        return;
+      }
+    }
+
+    const datosPedido = {
+      metodo_pago: metodoPago,
+      tipo_entrega: tipoEntrega.value,
+      datos_envio: datosEnvio
+    };
+
+    console.log("🔍 CARRITO: Enviando datos del pedido:", datosPedido);
+
+    // Enviar solicitud al backend
+    const response = await window.authManager.fetchAutenticado("/api/checkout/", {
+      method: "POST",
+      body: JSON.stringify(datosPedido)
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log("✅ CARRITO: Respuesta del checkout:", result);
+      
+      if (metodoPago === "tarjeta" && result.redirect_url) {
+        // Redirigir a Webpay
+        window.location.href = result.redirect_url;
+      } else if (metodoPago === "transferencia") {
+        // Mostrar información de transferencia y confirmar pedido
+         mostrarNotificacion('Pedido creado exitosamente. Revisa los datos de transferencia', 'success');
+        window.location.href = "/pedidos/";
+      } else {
+        // Otro caso
+        window.location.href = "/pago-exitoso/";
+      }
+    } else {
+      const error = await response.json();
+      console.error("❌ CARRITO: Error en checkout:", error);
+      alert(error.error || "Error al procesar el pago");
+    }
+  } catch (error) {
+    console.error("❌ CARRITO: Error al procesar pago:", error);
+    alert("Error al procesar el pago. Inténtalo nuevamente.");
+  }
+}
+
+/**
+ * Valida el formulario antes de proceder con la compra
+ */
+function validarFormularioCompra() {
+  const metodoPago = document.getElementById("metodoPago").value;
+  const tipoEntrega = document.querySelector('input[name="tipo_entrega"]:checked');
+  
+  // Validar método de pago
+  if (!metodoPago) {
+    mostrarNotificacion("Por favor selecciona un método de pago", "error");
+    document.getElementById("metodoPago").focus();
+    return false;
+  }
+  
+  // Validar tipo de entrega
+  if (!tipoEntrega) {
+    mostrarNotificacion("Por favor selecciona el tipo de entrega", "error");
+    return false;
+  }
+  
+  // Si es envío, validar datos de dirección y que se haya calculado el costo
+  if (tipoEntrega.value === 'envio') {
+    const direccion = document.getElementById("direccion");
+    const comuna = document.getElementById("comuna");
+    const region = document.getElementById("region");
+    
+    if (!direccion || !direccion.value.trim()) {
+      mostrarNotificacion('Por favor ingresa la dirección de envío', 'error');
+      if (direccion) direccion.focus();
+      return false;
+    }
+    
+    if (!comuna || !comuna.value.trim()) {
+      
+      mostrarNotificacion('Por favor selecciona la comuna', 'error');
+      if (comuna) comuna.focus();
+      return false;
+    }
+    
+    if (!region || !region.value.trim()) {
+      mostrarNotificacion('Por favor selecciona la región', 'error');
+      if (region) region.focus();
+      return false;
+    }
+    
+    // Validar que se haya calculado el costo de envío
+    if (!window.costoEnvioSeleccionado || window.costoEnvioSeleccionado <= 0) {
+      mostrarNotificacion("Debes calcular el costo de envío antes de finalizar la compra. Haz clic en 'Calcular costo de envío'.", "error");
+      const btnCalcularEnvio = document.getElementById("calcularEnvio");
+      if (btnCalcularEnvio) btnCalcularEnvio.focus();
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+/**
+ * Calcula totales del carrito (los precios YA incluyen IVA)
+ */
+function calcularTotalesCarrito(carrito, forzarEnvio = false) {
+  let totalConIva = 0;
+  
+  // Calcular total (los precios ya incluyen IVA)
+  carrito.forEach(item => {
+    if (item.precio !== undefined && item.cantidad !== undefined) {
+      totalConIva += item.precio * item.cantidad;
+    } else if (item.subtotal !== undefined) {
+      totalConIva += item.subtotal;
+    } else if (item.producto && item.producto.precio && item.cantidad) {
+      totalConIva += item.producto.precio * item.cantidad;
+    }
+  });
+  
+  // Calcular el neto (sin IVA) desde el total con IVA
+  const neto = Math.round(totalConIva / 1.19);
+  const iva = Math.round(totalConIva - neto);
+  
+  // Calcular costo de envío 
+  let costoEnvio = 0;
+  const tipoEntrega = document.querySelector('input[name="tipo_entrega"]:checked');
+  
+  if (tipoEntrega && tipoEntrega.value === 'envio') {
+    // Usar el costo de envío calculado por la API de Chilexpress
+    if (window.costoEnvioSeleccionado > 0) {
+      costoEnvio = window.costoEnvioSeleccionado;
+    } else if (forzarEnvio) {
+      // Solo usar valor por defecto si se fuerza y no hay costo calculado
+      costoEnvio = 0; // No usar valor fijo, requerir cálculo
+    }
+  }
+  
+  // Total final (ya incluye IVA de productos + costo envío)
+  const total = totalConIva + costoEnvio;
+  
+  return { 
+    subtotal: neto,      // Precio sin IVA (para mostrar desglosado)
+    iva: iva,           // IVA calculado
+    costoEnvio: costoEnvio, 
+    total: total        // Total final
+  };
+}
+
+/**
+ * Calcula el total del carrito (precios ya incluyen IVA)
+ */
+function calcularTotalCarrito(carrito) {
+  if (!carrito || carrito.length === 0) return 0;
+  
+  return carrito.reduce((total, item) => {
+    // Para carrito autenticado
+    if (item.precio !== undefined && item.cantidad !== undefined) {
+      return total + (item.precio * item.cantidad);
+    }
+    // Para carrito de invitado
+    if (item.subtotal !== undefined) {
+      return total + item.subtotal;
+    }
+    // Para carrito de invitado con producto anidado
+    if (item.producto && item.producto.precio && item.cantidad) {
+      return total + (item.producto.precio * item.cantidad);
+    }
+    return total;
+  }, 0);
+}
+
+/**
+ * Actualiza el resumen del carrito con subtotal, IVA, envío y total
+ */
+// --------------------------------------------------
+// 2) Función para actualizar el resumen del carrito
+// --------------------------------------------------
+function actualizarResumenCarrito(subtotal, iva, costoEnvio, total) {
+  // Actualiza TODOS los elementos (por si hay IDs duplicados)
+  document.querySelectorAll('#subtotal-carrito')
+    .forEach(el => el.textContent = formatPrice(subtotal));
+  document.querySelectorAll('#iva-carrito')
+    .forEach(el => el.textContent = formatPrice(iva));
+  document.querySelectorAll('#envio-carrito')
+    .forEach(el => el.textContent = formatPrice(costoEnvio));
+  document.querySelectorAll('#total-carrito')
+    .forEach(el => el.textContent = formatPrice(total));
+
+  // Mostrar/ocultar la fila de envío (ID único)
+  const envioRow = document.getElementById("envio-row");
+  if (envioRow) {
+    envioRow.style.display = costoEnvio > 0 ? 'flex' : 'none';
+  }
+  
+  console.log("🔍 RESUMEN: Actualizado", { subtotal, iva, costoEnvio, total });
+}
+
+
+
+/**
+ * Muestra u oculta los campos de dirección según el tipo de entrega
+ */
+function toggleCamposEnvio(mostrar) {
+  const camposEnvio = document.getElementById("envioContainer");
+  if (camposEnvio) {
+    camposEnvio.style.display = mostrar ? "block" : "none";
+  }
+}
+
+/**
+ * Calcula el costo de envío basado en los datos ingresados usando la API de Chilexpress
+ */
+async function calcularCostoEnvio() {
+  const direccion = document.getElementById("direccion");
+  const comuna = document.getElementById("comuna");
+  const region = document.getElementById("region");
+  
+  // Validar que todos los campos estén completos
+  if (!direccion || !direccion.value.trim()) {
+    mostrarNotificacion('Por favor ingresa la dirección de envío', 'error');
+    if (direccion) direccion.focus();
+    return;
+  }
+  
+  if (!comuna || !comuna.value.trim()) {
+    mostrarNotificacion('Por favor selecciona la comuna', 'error');
+    if (comuna) comuna.focus();
+    return;
+  }
+  
+  if (!region || !region.value.trim()) {
+
+    mostrarNotificacion('Por favor selecciona la región', 'error');
+    if (region) region.focus();
+    return;
+  }
+  
+  // Mostrar mensaje de cálculo
+  const btnCalcularEnvio = document.getElementById("calcularEnvio");
+  if (btnCalcularEnvio) {
+    btnCalcularEnvio.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculando...';
+    btnCalcularEnvio.disabled = true;
+  }
+  
+  try {
+    // Obtener carrito actual para calcular peso/volumen
+    const carrito = await obtenerCarritoActual();
+    if (!carrito || carrito.length === 0) {
+      mostrarNotificacion('No hay productos en el carrito', 'error');
+    }
+    
+    // Preparar datos para la API de Chilexpress
+    const datosEnvio = {
+      comuna_destino: comuna.value,
+      region_destino: region.value,
+      direccion_destino: direccion.value.trim(),
+      productos: carrito.map(item => ({
+        id: item.producto_id || item.id,
+        nombre: item.producto?.nombre || item.nombre,
+        precio: item.precio || item.producto?.precio,
+        cantidad: item.cantidad,
+        peso: item.peso || 1, // peso por defecto en kg
+        largo: item.largo || 10, // dimensiones por defecto en cm
+        ancho: item.ancho || 10,
+        alto: item.alto || 10
+      }))
+    };
+    
+    console.log("🔍 ENVÍO: Calculando costo con datos:", datosEnvio);
+    
+    // Decidir si usar autenticación o no
+    const isAuthenticated = await window.authManager.isAuthenticated();
+    let response;
+    
+    if (isAuthenticated) {
+      // Usuario autenticado - usar fetchAutenticado
+      response = await window.authManager.fetchAutenticado("/api/chilexpress/calcular-envio/", {
+        method: "POST",
+        body: JSON.stringify(datosEnvio)
+      });
+    } else {
+      // Usuario invitado - hacer fetch normal
+      response = await fetch("/api/chilexpress/calcular-envio/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+        },
+        body: JSON.stringify(datosEnvio)
+      });
+    }
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Error al calcular el envío");
+    }
+    
+    const data = await response.json();
+    console.log("✅ ENVÍO: Respuesta de Chilexpress:", data);
+    
+    if (data.success && data.opciones && data.opciones.length > 0) {
+      // Guardar opciones de envío globalmente
+      window.opcionesEnvio = data.opciones;
+      
+      // Mostrar opciones de envío disponibles
+      mostrarOpcionesEnvio(data.opciones);
+      
+      // Usar la primera opción por defecto para el cálculo
+      const opcionSeleccionada = data.opciones[0];
+      window.costoEnvioSeleccionado = opcionSeleccionada.precio || opcionSeleccionada.total;
+      window.opcionEnvioSeleccionada = {
+        index: 0,
+        costo: window.costoEnvioSeleccionado,
+        nombre: opcionSeleccionada.nombre || opcionSeleccionada.servicio
+      };
+      
+      // Recalcular totales con el costo real de envío
+      if (window.carritoActual) {
+        const { subtotal, iva } = calcularTotalesCarrito(window.carritoActual);
+        const total = subtotal + iva + window.costoEnvioSeleccionado;
+        actualizarResumenCarrito(subtotal, iva, window.costoEnvioSeleccionado, total);
+      }
+      
+      // NO llamar a mostrarMensajeEnvio aquí porque sobrescribe las opciones
+      console.log(`✅ ENVÍO: ${data.opciones.length} opciones calculadas exitosamente`);
+    } else {
+      mostrarNotificacion('No se encontraron opciones de envío para esta comuna', 'error');
+      throw new Error(data.error || "No se encontraron opciones de envío para esta comuna");
+    }
+    
+  } catch (error) {
+    console.error("❌ ENVÍO: Error al calcular costo:", error);
+    
+    // Mostrar error al usuario
+    mostrarMensajeEnvio(`Error: ${error.message}`, "danger");
+    
+    // Limpiar opciones de envío
+    window.opcionesEnvio = null;
+    window.costoEnvioSeleccionado = 0;
+    
+    // Recalcular totales sin envío
+    if (window.carritoActual) {
+      const { subtotal, iva } = calcularTotalesCarrito(window.carritoActual);
+      actualizarResumenCarrito(subtotal, iva, 0, subtotal + iva);
+    }
+    
+  } finally {
+    // Restaurar botón
+    if (btnCalcularEnvio) {
+      btnCalcularEnvio.innerHTML = '<i class="fas fa-calculator"></i> Recalcular envío';
+      btnCalcularEnvio.disabled = false;
+    }
+  }
+}
+
+/**
+ * Muestra las opciones de envío disponibles para que el usuario pueda elegir
+ */
+// --------------------------------------------------
+// 1) Función para mostrar las opciones de envío
+// --------------------------------------------------
+function mostrarOpcionesEnvio(opciones) {
+  const shippingOptions = document.getElementById("shippingOptions");
+  if (!shippingOptions || !opciones || opciones.length === 0) return;
+  
+  // Genera el HTML
+  let html = `
+    <div class="alert alert-success mb-3" role="alert">
+      <h6><i class="fas fa-check-circle"></i> ¡Envío calculado exitosamente!</h6>
+      <small>Se encontraron ${opciones.length} opciones de envío. Selecciona la que prefieras:</small>
+    </div>
+  `;
+  
+  opciones.forEach((opcion, index) => {
+    const precio = opcion.precio;
+    const nombre = opcion.descripcion;
+    const tiempo = opcion.tiempo_entrega || opcion.dias || 'No especificado';
+    
+    html += `
+      <div class="form-check mb-2 p-3 border rounded ${index === 0 ? 'border-primary bg-light' : ''}">
+        <input class="form-check-input" type="radio" name="opcion_envio" 
+               id="envio_${index}" value="${precio}"
+               data-costo="${precio}" data-nombre="${nombre}"
+               ${index === 0 ? 'checked' : ''}>
+        <label class="form-check-label d-flex justify-content-between w-100" for="envio_${index}">
+          <div>
+            <strong>${nombre}</strong><br>
+            <small class="text-muted">Tiempo estimado: ${tiempo}</small>
+            ${index === 0
+              ? '<small class="text-primary"><i class="fas fa-star"></i> Opción seleccionada</small>'
+              : ''}
+          </div>
+          <div class="text-end">
+            <strong>${formatPrice(precio)}</strong>
+          </div>
+        </label>
+      </div>
+    `;
+  });
+  
+  shippingOptions.innerHTML = html;
+
+  // Registrar listener de cambio en cada radio
+  const radios = shippingOptions.querySelectorAll('input[name="opcion_envio"]');
+  radios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (!this.checked) return;
+      
+      const nuevoCosto = parseFloat(this.dataset.costo);
+      const nombreOpcion = this.dataset.nombre;
+      
+      // Variables globales
+      window.costoEnvioSeleccionado = nuevoCosto;
+      window.opcionEnvioSeleccionada = {
+        index: parseInt(this.value),
+        costo: nuevoCosto,
+        nombre: nombreOpcion
+      };
+      
+      // Recalcular totales
+      if (window.carritoActual) {
+        const { subtotal, iva } = calcularTotalesCarrito(window.carritoActual);
+        const total = subtotal + iva + nuevoCosto;
+        actualizarResumenCarrito(subtotal, iva, nuevoCosto, total);
+      }
+      
+      // Actualizar estilos visuales
+      radios.forEach(r => {
+        const cont = r.closest('.form-check');
+        cont.classList.remove('border-primary', 'bg-light');
+        const tag = cont.querySelector('small.text-primary');
+        if (tag) tag.remove();
+      });
+      const selCont = this.closest('.form-check');
+      selCont.classList.add('border-primary', 'bg-light');
+      const div = selCont.querySelector('label > div');
+      div.innerHTML += '<br><small class="text-primary"><i class="fas fa-star"></i> Opción seleccionada</small>';
+    });
+  });
+
+  // Forzar cálculo inicial en el radio marcado
+  const checked = shippingOptions.querySelector('input[name="opcion_envio"]:checked');
+  if (checked) {
+    checked.dispatchEvent(new Event('change'));
+  }
+}
+
+
+
+/**
+ * Limpia el carrito después de una compra exitosa
+ * Funciona tanto para usuarios autenticados como invitados
+ */
+async function limpiarCarritoDespuesDeCompra() {
+  try {
+    console.log("🧹 CARRITO: Limpiando carrito después de compra exitosa...");
+    
+    const isAuthenticated = await window.authManager.isAuthenticated();
+    
+    if (isAuthenticated) {
+      // Usuario autenticado - limpiar carrito en el servidor
+      console.log("🧹 CARRITO: Limpiando carrito de usuario autenticado");
+      
+      try {
+        const response = await window.authManager.fetchAutenticado("/api/carrito/limpiar/", {
+          method: "POST"
+        });
+        
+        if (!response.ok) {
+          // Si no existe el endpoint, intentar vaciar manualmente
+          console.log("🧹 CARRITO: Endpoint de limpiar no existe, vaciando manualmente...");
+          await vaciarCarritoAutenticadoManualmente();
+        } else {
+          console.log("✅ CARRITO: Carrito de usuario autenticado limpiado exitosamente");
+        }
+      } catch (error) {
+        console.log("🧹 CARRITO: Error con endpoint, vaciando manualmente...");
+        await vaciarCarritoAutenticadoManualmente();
+      }
+    } else {
+      // Usuario invitado - limpiar carrito local
+      console.log("🧹 CARRITO: Limpiando carrito de usuario invitado");
+      localStorage.removeItem("carrito_invitado");
+      console.log("✅ CARRITO: Carrito de invitado limpiado exitosamente");
+    }
+    
+    // Limpiar variables globales de envío
+    window.costoEnvioSeleccionado = 0;
+    window.opcionesEnvio = null;
+    window.opcionEnvioSeleccionada = null;
+    window.carritoActual = [];
+    
+    // Actualizar contador del carrito en el header
+    await window.authManager.actualizarContadorCarrito();
+    
+    console.log("✅ CARRITO: Limpieza completa finalizada");
+    
+  } catch (error) {
+    console.error("❌ CARRITO: Error al limpiar carrito:", error);
+    // No lanzar error para no interrumpir el flujo de compra
+  }
+}
+
+/**
+ * Vacia el carrito autenticado manualmente eliminando todos los productos
+ */
+async function vaciarCarritoAutenticadoManualmente() {
+  try {
+    // Obtener todos los productos del carrito
+    const response = await window.authManager.fetchAutenticado("/api/carrito/");
+    if (response.ok) {
+      const data = await response.json();
+      const carrito = data.carrito;
+      
+      // Eliminar cada producto del carrito
+      for (const item of carrito) {
+        try {
+          await window.authManager.fetchAutenticado(`/api/carrito/remover/${item.producto_id}/`, {
+            method: 'POST'
+          });
+        } catch (error) {
+          console.warn(`Error eliminando producto ${item.producto_id}:`, error);
+        }
+      }
+      
+      console.log("✅ CARRITO: Carrito autenticado vaciado manualmente");
+    }
+  } catch (error) {
+    console.error("❌ CARRITO: Error vaciando carrito manualmente:", error);
+  }
+}
+
+
+</script>
+    <script>/**
+ * Módulo para manejar la integración con Chilexpress
+ * Adaptado del código JavaScript original para trabajar con el backend Django
+ */
+
+class ChilexpressManager {
+    constructor() {
+        this.regionSelect = document.getElementById("region");
+        this.comunaSelect = document.getElementById("comuna");
+        this.shippingOptions = document.getElementById("shippingOptions");
+        this.calcularBtn = document.getElementById("calcularEnvio");
+        this.initialized = false;
+        
+        this.resumen = {
+            subtotal: 0,
+            iva: 0,
+            envio: 0,
+            total: 0
+        };
+        
+        // Prevenir múltiples inicializaciones
+        if (this.initialized) return;
+        
+        this.init();
+        this.initialized = true;
+    }
+    
+    init() {
+        this.cargarRegiones();
+        this.setupEventListeners();
+    }
+    
+    async cargarRegiones() {
+        try {
+            const response = await fetch('/api/chilexpress/regiones/');
+            const data = await response.json();
+            console.log(data);
+            if (data.success) {
+                this.regionSelect.innerHTML = '<option value="">Seleccione una región</option>';
+                
+                data.regiones.forEach(region => {
+                    const option = document.createElement("option");
+                    option.value = region.regionId;
+                    option.textContent = region.regionName;
+                    this.regionSelect.appendChild(option);
+                });
+            } else {
+                console.error("Error cargando regiones:", data.error);
+                this.mostrarError("No se pudieron cargar las regiones");
+            }
+        } catch (error) {
+            console.error("Error conectando con el servidor:", error);
+            this.mostrarError("Error de conexión al cargar regiones");
+        }
+    }
+    
+    async cargarComunas(regionId) {
+        try {
+            this.comunaSelect.innerHTML = '<option value="">Cargando...</option>';
+            
+            const response = await fetch(`/api/chilexpress/comunas/${regionId}/`);
+            const data = await response.json();
+            console.log(data);
+            if (data.success) {
+                this.comunaSelect.innerHTML = '<option value="">Seleccione una comuna</option>';
+                
+                data.comunas.forEach(comuna => {
+                    const option = document.createElement("option");
+                    option.value = comuna.countyCode;
+                    option.textContent = comuna.coverageName;
+                    this.comunaSelect.appendChild(option);
+                });
+            } else {
+                console.error("Error cargando comunas:", data.error);
+                this.mostrarError("No se pudieron cargar las comunas");
+            }
+        } catch (error) {
+            console.error("Error conectando con el servidor:", error);
+            this.mostrarError("Error de conexión al cargar comunas");
+        }
+    }
+    
+   async calcularTarifasEnvio() {
+    const comunaDestino = this.comunaSelect.value;
+    if (!comunaDestino) {
+        this.mostrarError("Seleccione una comuna");
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            mostrarNotificacion('Debe iniciar sesión para calcular envío', 'error');
+            return;
+        }
+
+        // OBTENER PRODUCTOS DEL CARRITO DESDE LOCALSTORAGE
+        let productos = [];
+        try {
+            productos = JSON.parse(localStorage.getItem("carrito")) || [];
+        } catch (e) {
+            productos = [];
+        }
+
+        this.shippingOptions.innerHTML = '<p class="text-muted">Calculando opciones de envío...</p>';
+
+        const response = await fetch('/api/chilexpress/calcular-envio/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`
+            },
+            body: JSON.stringify({
+                comuna_destino: comunaDestino,
+                productos: productos
+            })
+        });
+
+        const data = await response.json();
+        console.log(data);
+        if (data.success) {
+            this.mostrarOpcionesEnvio(data.opciones);
+            this.resumen.subtotal = data.subtotal;
+            this.actualizarResumen();
+        } else {
+            console.error("Error calculando envío:", data.error);
+            this.mostrarError(data.error);
+        }
+
+    } catch (error) {
+        console.error("Error conectando con el servidor:", error);
+        mostrarNotificacion('Error de conexión al calcular envío', 'error');
+    }
+}
+    
+    mostrarOpcionesEnvio(opciones) {
+        this.shippingOptions.innerHTML = "";
+        
+        if (opciones && opciones.length > 0) {
+            opciones.forEach((opcion, index) => {
+                const optionHTML = `
+                    <div class="form-check mb-2">
+                        <input class="form-check-input opcion-envio" type="radio" name="opcionEnvio" 
+                               id="opcion${index}" value="${opcion.precio}">
+                        <label class="form-check-label" for="opcion${index}">
+                            <strong>${opcion.descripcion}</strong><br>
+                            <span class="text-success">${opcion.precio_formateado}</span>
+                        </label>
+                    </div>
+                `;
+                this.shippingOptions.insertAdjacentHTML("beforeend", optionHTML);
+            });
+            
+            // Remover listeners existentes para evitar duplicados
+            document.querySelectorAll(".opcion-envio").forEach(radio => {
+                radio.removeEventListener("change", this.actualizarResumen);
+            });
+            
+            // Agregar nuevos event listeners
+            document.querySelectorAll(".opcion-envio").forEach(radio => {
+                radio.addEventListener("change", () => this.actualizarResumen());
+            });
+            
+        } else {
+            this.shippingOptions.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    No hay opciones de envío disponibles para esta comuna.
+                </div>
+            `;
+        }
+    }
+    
+    mostrarError(mensaje) {
+        this.shippingOptions.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                ${mensaje}
+            </div>
+        `;
+    }
+    
+    actualizarResumen() {
+        const envioSeleccionado = document.querySelector("input[name='opcionEnvio']:checked");
+        
+        this.resumen.envio = envioSeleccionado ? parseInt(envioSeleccionado.value) : 0;
+        this.resumen.iva = this.resumen.subtotal * 0.19;
+        this.resumen.total = this.resumen.subtotal + this.resumen.iva + this.resumen.envio;
+        
+        // Actualizar elementos del DOM
+        const subtotalEl = document.getElementById("subtotal");
+        const totalFinalEl = document.getElementById("totalFinal");
+        const impuestosEl = document.getElementById("impuestos");
+        const envioEl = document.getElementById("envio");
+        
+        if (subtotalEl) {
+            subtotalEl.textContent = this.formatearPrecio(this.resumen.subtotal);
+        }
+        if (impuestosEl) {
+            impuestosEl.textContent = this.formatearPrecio(this.resumen.iva);
+        }
+        if (envioEl) {
+            envioEl.textContent = this.formatearPrecio(this.resumen.envio);
+        }
+        if (totalFinalEl) {
+            totalFinalEl.textContent = this.formatearPrecio(this.resumen.total);
+        }
+        
+        // Disparar evento personalizado para que otros componentes puedan reaccionar
+        document.dispatchEvent(new CustomEvent('resumenActualizado', {
+            detail: this.resumen
+        }));
+    }
+    
+    formatearPrecio(precio) {
+        return precio.toLocaleString("es-CL", { 
+            style: "currency", 
+            currency: "CLP" 
+        });
+    }
+    
+    setupEventListeners() {
+        // Cambio de región
+        if (this.regionSelect) {
+            this.regionSelect.addEventListener("change", () => {
+                const regionId = this.regionSelect.value;
+                if (regionId) {
+                    this.cargarComunas(regionId);
+                } else {
+                    this.comunaSelect.innerHTML = '<option value="">Primero seleccione una región</option>';
+                }
+            });
+        }
+        
+        // Botón calcular envío
+        // if (this.calcularBtn) {
+        //     this.calcularBtn.addEventListener("click", () => {
+        //         this.calcularTarifasEnvio();
+        //     });
+        // }
+        
+        // Manejo del tipo de entrega
+        const tipoEntregaInputs = document.querySelectorAll("input[name='tipo_entrega']");
+        tipoEntregaInputs.forEach(input => {
+            input.addEventListener("change", (e) => {
+                const envioContainer = document.getElementById("envioContainer");
+                
+                if (e.target.value === "envio") {
+                    // Mostrar formulario de envío
+                    if (envioContainer) envioContainer.style.display = "block";
+                    // Limpiar opciones de envío anteriores
+                    this.shippingOptions.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Complete los datos de envío y haga clic en "Calcular costo de envío" para ver las opciones disponibles.
+                        </div>
+                    `;
+                    this.resumen.envio = 0;
+                    this.actualizarResumen();
+                } else if (e.target.value === "retiro") {
+                    // Ocultar formulario de envío y mostrar información de retiro
+                    if (envioContainer) envioContainer.style.display = "none";
+                    this.shippingOptions.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-store"></i>
+                            <strong>Retiro en tienda</strong><br>
+                            <div class="mt-2">
+                                <strong>Dirección:</strong> Diez de Julio 525, Santiago Centro<br>
+                                <strong>Comuna:</strong> Santiago<br>
+                                <strong>Horario:</strong> Lunes a Viernes 9:00 - 18:00<br>
+                                <strong>Teléfono:</strong> +56 9 1234 5678<br>
+                                <small class="text-muted mt-2 d-block">
+                                    <i class="fas fa-check-circle text-success"></i> 
+                                    Sin costo adicional por retiro
+                                </small>
+                            </div>
+                        </div>
+                    `;
+                    this.resumen.envio = 0;
+                    this.actualizarResumen();
+                }
+            });
+        });
+    }
+    
+    // Método público para obtener el resumen actual
+    getResumen() {
+        return { ...this.resumen };
+    }
+    
+    // Método público para obtener la opción de envío seleccionada
+    getOpcionEnvioSeleccionada() {
+        const seleccionada = document.querySelector("input[name='opcionEnvio']:checked");
+        if (seleccionada) {
+            return {
+                precio: parseInt(seleccionada.value),
+                descripcion: seleccionada.nextElementSibling.textContent.trim()
+            };
+        }
+        return null;
+    }
+}
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener("DOMContentLoaded", () => {
+    // Solo inicializar si estamos en la página del carrito y no existe ya
+    if (document.getElementById("region") && document.getElementById("comuna") && !window.chilexpressManager) {
+        console.log("Inicializando ChilexpressManager...");
+        window.chilexpressManager = new ChilexpressManager();
+    }
+});
+
+// Exportar para uso en otros scripts
+window.ChilexpressManager = ChilexpressManager;
+</script>
+
+</body>
+</html>

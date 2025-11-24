@@ -1,0 +1,350 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Sistema de Inventario - Taller de Manolo</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link rel="icon" href="{% static 'img/favicon.ico.png' %}" type="image/x-icon">
+
+    <!-- Fuentes y estilos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+
+    <style>
+        .taller-header {
+            background: linear-gradient(135deg, #1a5490 0%, #2c5f8a 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .taller-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .search-section {
+            background: #f8f9fa;
+            padding: 30px 0;
+            border-bottom: 3px solid #1a5490;
+        }
+        
+        .api-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .api-connected {
+            background: #d1edff;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .api-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .product-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-color: #1a5490;
+        }
+        
+        .stock-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .stock-available {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .stock-low {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .stock-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .price-tag {
+            background: #1a5490;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 0 0 8px 8px;
+            font-weight: bold;
+        }
+        
+        .loading-spinner {
+            display: none;
+        }
+        
+        .search-filters {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .taller-footer {
+            background: #2c5f8a;
+            color: white;
+            padding: 20px 0;
+            margin-top: 50px;
+        }
+        
+        .integration-info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left: 4px solid #1a5490;
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header del Taller -->
+<header class="taller-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="taller-logo">
+                    <i class="fas fa-wrench me-2"></i>
+                    Taller de Manolo
+                </div>
+                <small>Sistema de Inventario de Repuestos</small>
+            </div>
+            <div class="col-md-6 text-end">
+                <div id="api-status" class="api-status api-connected">
+                    <i class="fas fa-wifi"></i>
+                    <span>Conectado a AutoParts API</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Sección de Búsqueda -->
+<section class="search-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="search-filters">
+                    <h3 class="mb-4">
+                        <i class="fas fa-search text-primary"></i>
+                        Consultar Repuestos en AutoParts
+                    </h3>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">¿Qué repuesto necesitas?</label>
+                            <div class="input-group">
+                                <input type="text" id="search-input" class="form-control" 
+                                       placeholder="Ej: filtro de aceite, amortiguador, frenos..." 
+                                       value="">
+                                <button class="btn btn-primary" onclick="buscarRepuestos()">
+                                    <i class="fas fa-search"></i> Buscar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Categoría</label>
+                            <select id="category-filter" class="form-select">
+                                <option value="">Todas las categorías</option>
+                                <!-- Se llenarán dinámicamente -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Stock</label>
+                            <select id="stock-filter" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="true">Solo disponibles</option>
+                                <option value="false">Sin stock</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-primary me-2" onclick="verCatalogoCompleto()">
+                                <i class="fas fa-list"></i> Ver Catálogo Completo
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="limpiarResultados()">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i>
+                                Datos actualizados en tiempo real desde AutoParts
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Información de Integración -->
+<section class="py-4">
+    <div class="container">
+        <div class="integration-info">
+            <h5 class="mb-2">
+                <i class="fas fa-plug"></i> Integración con AutoParts API
+            </h5>
+            <p class="mb-1">
+                <strong>Estado:</strong> <span id="connection-details">Conectado correctamente</span> |
+                <strong>API Key:</strong> TALLER_MANOLO_2024 |
+                <strong>Última consulta:</strong> <span id="last-update">--</span>
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Resultados -->
+<section class="py-4">
+    <div class="container">
+        <!-- Loading -->
+        <div id="loading-section" class="text-center py-5 loading-spinner">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Consultando AutoParts API...</span>
+            </div>
+            <p class="mt-3">Consultando catálogo de AutoParts...</p>
+        </div>
+
+        <!-- Resultados -->
+        <div id="results-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 id="results-title">Resultados de la Búsqueda</h4>
+                <div>
+                    <span class="badge bg-primary" id="results-count">0 productos</span>
+                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="exportarResultados()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="row" id="products-container">
+                <!-- Los productos se cargarán aquí -->
+            </div>
+            
+            <!-- Paginación -->
+            <nav aria-label="Paginación de productos" class="mt-4">
+                <ul class="pagination justify-content-center" id="pagination-container">
+                    <!-- La paginación se cargará aquí -->
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Estado vacío -->
+        <div id="empty-state" class="text-center py-5" style="display: none;">
+            <i class="fas fa-search fa-4x text-muted mb-3"></i>
+            <h5 class="text-muted">Busca repuestos en AutoParts</h5>
+            <p class="text-muted">Usa el buscador para consultar disponibilidad de productos</p>
+        </div>
+
+        <!-- Estado de error -->
+        <div id="error-state" class="text-center py-5" style="display: none;">
+            <i class="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>
+            <h5 class="text-warning">Error de Conexión</h5>
+            <p class="text-muted">No se pudo conectar con la API de AutoParts</p>
+            <button class="btn btn-warning" onclick="reintentar()">
+                <i class="fas fa-redo"></i> Reintentar
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Footer del Taller -->
+<footer class="taller-footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Taller de Manolo</h6>
+                <p class="small mb-0">
+                    <i class="fas fa-map-marker-alt me-1"></i>
+                    Av. Providencia 1234, Santiago
+                </p>
+                <p class="small">
+                    <i class="fas fa-phone me-1"></i>
+                    +56 2 2234 5678
+                </p>
+            </div>
+            <div class="col-md-6 text-end">
+                <p class="small mb-0">Integrado con AutoParts API</p>
+                <p class="small">Sistema desarrollado en 2024</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Modal para Detalle de Producto -->
+<div class="modal fade" id="modalDetalleProducto" tabindex="-1" aria-labelledby="modalDetalleProductoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #1a5490; color: white;">
+                <h5 class="modal-title" id="modalDetalleProductoLabel">
+                    <i class="fas fa-cog"></i> Detalle del Repuesto
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-loading" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+                
+                <div id="modal-content" style="display: none;">
+                    <!-- El contenido se cargará dinámicamente -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" onclick="consultarDisponibilidad()">
+                    <i class="fas fa-phone"></i> Consultar Disponibilidad
+                </button>
+                <button type="button" class="btn btn-primary" onclick="agregarAPresupuesto()">
+                    <i class="fas fa-plus"></i> Agregar a Presupuesto
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/taller_manolo.js' %}"></script>
+
+</body>
+</html>

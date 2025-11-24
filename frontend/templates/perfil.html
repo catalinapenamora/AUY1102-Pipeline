@@ -1,0 +1,286 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Mi Perfil - AutoParts</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link rel="icon" href="{% static 'img/favicon.ico.png' %}" type="image/x-icon"> 
+
+    <!-- Fuentes y estilos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Librerías -->
+    <link href="{% static 'lib/lightbox/css/lightbox.min.css' %}" rel="stylesheet">
+    <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+
+    <!-- Bootstrap y estilos -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <link href="{% static 'css/perfil.css' %}" rel="stylesheet">
+
+    {% include "base/header.html" %}
+</head>
+<body>
+<div class="perfil-container" style="padding-top: 180px;">
+    <div class="container">
+        <!-- Card de Información Personal -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header text-white" style="background-color: #780000;">
+                        <h4 class="mb-0" style="color: #ffffff;">
+                            <i class="fas fa-user"></i> Mi Información Personal
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-2 text-center">
+                                <div class="perfil-avatar mb-3">
+                                    <i class="fas fa-user-circle" style="font-size: 4rem; color: #780000;"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-10">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label text-muted">Nombre:</label>
+                                            <div class="form-control-plaintext" id="info-nombre">Cargando...</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label text-muted">RUT:</label>
+                                            <div class="form-control-plaintext" id="info-rut">Cargando...</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label text-muted">Email:</label>
+                                            <div class="form-control-plaintext" id="info-email">Cargando...</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label text-muted">Tipo de Usuario:</label>
+                                            <div class="form-control-plaintext">
+                                                <span class="badge" style="background-color: #003049;" id="perfil-role">Cliente</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12 text-end">
+                                <button id="logout-btn" class="btn btn-outline-danger">
+                                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Pedidos -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header text-white" style="background-color: #003049;">
+                        <h4 class="mb-0">
+                            <i class="fas fa-history"></i> Historial de Pedidos
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="loading-historial" class="text-center py-4">
+                            <div class="spinner-border" style="color: #780000;" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-2">Cargando historial...</p>
+                        </div>
+                        
+                        <div id="historial-pedidos" style="display: none;">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="tabla-pedidos">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Pedido</th>
+                                            <th>Fecha</th>
+                                            <th>Estado</th>
+                                            <th>Total</th>
+                                            <th>Entrega</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-pedidos">
+                                        <!-- Los pedidos se cargarán aquí dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div id="empty-historial" class="text-center py-5" style="display: none;">
+                            <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No tienes pedidos aún</h5>
+                            <p class="text-muted">¡Explora nuestro catálogo y realiza tu primera compra!</p>
+                            <a href="/catalogo/" class="btn" style="background-color: #780000; color: white;">
+                                <i class="fas fa-shopping-cart"></i> Ver Catálogo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para ver detalles del pedido -->
+<div class="modal fade" id="modalDetallePedido" tabindex="-1" aria-labelledby="modalDetallePedidoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #003049; color: white;">
+                <h5 class="modal-title" id="modalDetallePedidoLabel">
+                    <i class="fas fa-shopping-bag"></i> Detalles del Pedido
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="loading-detalle" class="text-center py-4">
+                    <div class="spinner-border" style="color: #780000;" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando detalles...</p>
+                </div>
+                
+                <div id="contenido-detalle" style="display: none;">
+                    <!-- Información del pedido -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Información del Pedido</h6>
+                            <p><strong>Pedido:</strong> <span id="detalle-order-id">#</span></p>
+                            <p><strong>Fecha:</strong> <span id="detalle-fecha">-</span></p>
+                            <p><strong>Estado:</strong> <span id="detalle-estado-badge">-</span></p>
+                            <p><strong>Total:</strong> <span id="detalle-total">-</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Información de Entrega</h6>
+                            <p><strong>Tipo:</strong> <span id="detalle-tipo-entrega">-</span></p>
+                            <div id="detalle-direccion" style="display: none;">
+                                <p><strong>Dirección:</strong><br>
+                                <span id="detalle-direccion-completa">-</span></p>
+                            </div>
+                            <div id="detalle-envio" style="display: none;">
+                                <p><strong>Código de seguimiento:</strong> <span id="detalle-ot-codigo">-</span></p>
+                            </div>
+                            
+                            <!-- Información de transferencia bancaria -->
+                            <div id="detalle-transferencia" style="display: none;">
+                                <h6 class="text-muted mt-3">Información de Transferencia</h6>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Pago Pendiente</strong> - Complete la transferencia para confirmar su pedido.
+                                </div>
+                                <div class="card border-primary">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-primary">
+                                            <i class="fas fa-university"></i> Datos para Transferencia
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong>Banco:</strong> <span id="transferencia-banco">-</span></p>
+                                                <p><strong>Tipo de Cuenta:</strong> <span id="transferencia-tipo-cuenta">-</span></p>
+                                                <p><strong>Nº de Cuenta:</strong> <span id="transferencia-numero-cuenta">-</span></p>
+                                                <p><strong>Titular:</strong> <span id="transferencia-titular">-</span></p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p><strong>RUT Titular:</strong> <span id="transferencia-rut-titular">-</span></p>
+                                                <p><strong>Monto a Transferir:</strong> <strong class="text-success" id="transferencia-monto">-</strong></p>
+                                                <p><strong>Referencia:</strong> <span id="transferencia-order-id">-</span></p>
+                                                <p><strong>Enviar comprobante a:</strong><br>
+                                                <span class="text-primary" id="transferencia-email">-</span></p>
+                                            </div>
+                                        </div>
+                                        <div class="alert alert-info mt-3">
+                                            <small>
+                                                <i class="fas fa-info-circle"></i>
+                                                <strong>Importante:</strong> Una vez realizada la transferencia, envíe el comprobante al email indicado 
+                                                mencionando el número de pedido como referencia. Su pedido será confirmado en un plazo máximo de 24 horas.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Productos del pedido -->
+                    <div class="mb-3">
+                        <h6 class="text-muted">Productos del Pedido</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio Unit.</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detalle-productos">
+                                    <!-- Productos se cargarán aquí -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Resumen de costos -->
+                        <div class="row justify-content-end">
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body py-2">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>Subtotal (sin IVA):</span>
+                                            <span id="detalle-subtotal-sin-iva">-</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>IVA (19%):</span>
+                                            <span id="detalle-iva">-</span>
+                                        </div>
+                                        <hr class="my-2">
+                                        <div class="d-flex justify-content-between fw-bold">
+                                            <span>Total:</span>
+                                            <span id="detalle-total-final">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "base/footer.html" %}
+
+<!-- Scripts JS principales -->
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'lib/easing/easing.min.js' %}"></script>
+<script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+<script src="{% static 'lib/lightbox/js/lightbox.min.js' %}"></script>
+<script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+
+<!-- Scripts específicos de la página -->
+<script src="{% static 'js/auth_manager.js' %}"></script>
+<script src="{% static 'js/perfil_profesional.js' %}"></script>
+
+</body>
+</html>
