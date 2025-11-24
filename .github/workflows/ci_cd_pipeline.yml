@@ -1,17 +1,18 @@
-# .github/workflows/ci_cd_pipeline.yml
+# .github/workflows/ci_cd_pipeline.yml (VERSIÓN CORREGIDA)
 name: Integración Continua y Entrega Continua (CI/CD)
 
-# DISPARADORES (Triggers)
 on:
   push:
     branches:
-      - develop # Ejecuta en cada push a develop (para despliegue)
+      - develop
   pull_request:
     branches:
-      - main # Ejecuta en cada PR a main (para seguridad y revisión)
+      - main
 
-# --- JOB 1: SEGURIDAD Y CALIDAD (Parte 2) ---
-security-scan:
+# ✅ CORRECCIÓN CLAVE: Añadir la etiqueta 'jobs:' y tabular los jobs debajo.
+jobs:
+  # --- JOB 1: SEGURIDAD Y CALIDAD (Parte 2) ---
+  security-scan:
     runs-on: ubuntu-latest
     
     # Solo ejecuta este job en Pull Requests a main (momento ideal para revisar seguridad)
@@ -36,7 +37,7 @@ security-scan:
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} 
       with:
-        command: test # Usa 'test' para que la tarea falle si hay problemas
+        command: test
         args: --file=requirements.txt
 
     # REQUISITO: Integrar SonarCloud
@@ -51,12 +52,11 @@ security-scan:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
         
-# --- JOB 2: CONSTRUCCIÓN, PRUEBAS Y PUBLICACIÓN (Parte 1) ---
-build-test-publish: 
+  # --- JOB 2: CONSTRUCCIÓN, PRUEBAS Y PUBLICACIÓN (Parte 1) ---
+  build-test-publish: 
     runs-on: ubuntu-latest
     
-    # REQUISITO: Interrumpir el despliegue
-    # Este Job NO se ejecuta si el Job 'security-scan' falló.
+    # REQUISITO: Interrumpir el despliegue (este job depende del éxito del security-scan)
     needs: [security-scan] 
 
     steps:
@@ -72,7 +72,7 @@ build-test-publish:
     - name: ⚙️ Configurar Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    # REQUISITO: Construcción de la imagen Docker. (Usando tu Dockerfile)
+    # REQUISITO: Construcción de la imagen Docker.
     - name: 🏗️ Construir Imagen Docker
       id: docker_build
       uses: docker/build-push-action@v5
@@ -95,7 +95,6 @@ build-test-publish:
 
     # REQUISITO: Publicación en Docker Hub si las pruebas son exitosas.
     - name: 🚀 Publicar Imagen en Docker Hub
-      # SÓLO se publica si todo lo anterior fue 'success()' Y es un push directo a 'develop'.
       if: success() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
       uses: docker/build-push-action@v5
       with:
