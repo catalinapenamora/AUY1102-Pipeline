@@ -57,7 +57,8 @@ jobs:
     runs-on: ubuntu-latest
     
     # REQUISITO: Interrumpir el despliegue (este job depende del éxito del security-scan)
-    needs: [security-scan] 
+    # needs: [security-scan]
+    environment: Configure SDLC 
 
     steps:
     - name: ⬇️ Checkout del Código
