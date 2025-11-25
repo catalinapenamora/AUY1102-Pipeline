@@ -27,7 +27,7 @@ jobs:
     - name: Run unit tests inside container
       run: |
         # Ejecuta pruebas dentro del contenedor (ajusta según tu app)
-        docker run --rm autoparts-app:${{ github.sha }} python manage.py test
+        docker run --rm autoparts-app:${{ github.sha }} /bin/bash -c "cd backend && python manage.py test"
         # Si las pruebas requieren migraciones o DB: agrega comandos como
         # docker run ... python manage.py migrate
         # docker run ... python manage.py test --settings=tu_settings_test
