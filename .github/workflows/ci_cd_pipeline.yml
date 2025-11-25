@@ -91,7 +91,6 @@ jobs:
     # REQUISITO: Ejecución de pruebas unitarias dentro del contenedor.
     - name: 🧪 Ejecutar Pruebas Unitarias
       run: |
-	echo "Ejecutando pruebas de Django..."
         docker run --rm autopartss:latest python backend/manage.py test
 
     # REQUISITO: Publicación en Docker Hub si las pruebas son exitosas.
