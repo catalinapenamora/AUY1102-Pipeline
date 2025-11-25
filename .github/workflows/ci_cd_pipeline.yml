@@ -79,19 +79,20 @@ jobs:
       with:
         context: .
         push: false
-        tags: ${{ secrets.DOCKER_USERNAME }}/autopartss:latest
+        tags: autopartss:latest
 
     # REQUISITO: Integrar Docker Scout
     - name: 🐳 Escaneo de la Imagen con Docker Scout
       uses: docker/scout-action@v1
       with:
-        image: ${{ secrets.DOCKER_USERNAME }}/autopartss:latest
+        image: autopartss:latest
         command: cves
 
     # REQUISITO: Ejecución de pruebas unitarias dentro del contenedor.
     - name: 🧪 Ejecutar Pruebas Unitarias
       run: |
-        docker run --rm ${{ secrets.DOCKER_USERNAME }}/autopartss:latest python backend/manage.py test
+	echo "Ejecutando pruebas de Django..."
+        docker run --rm autopartss:latest python backend/manage.py test
 
     # REQUISITO: Publicación en Docker Hub si las pruebas son exitosas.
     - name: 🚀 Publicar Imagen en Docker Hub
