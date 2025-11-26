@@ -16,7 +16,7 @@ jobs:
 
     # NUEVO: SonarCloud - Solo en PRs a main
     - name: SonarCloud Begin
-      if: github.ref == 'refs/heads/develop' || (github.event_name == 'pull_request' && github.base_ref == 'main')
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
 
       uses: sonarsource/sonarqube-scan-action@master  # Action oficial
       env:
@@ -25,7 +25,7 @@ jobs:
 
     # NUEVO: SonarCloud Execute (CORREGIDO: Agregado - name: e indentación)
     - name: SonarCloud Execute
-      if: github.ref == 'refs/heads/develop' || (github.event_name == 'pull_request' && github.base_ref == 'main')
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
 
       uses: sonarsource/sonarqube-scan-action@master
       env:
@@ -36,7 +36,7 @@ jobs:
 
     # NUEVO: SonarCloud Quality Gate (interrumpe si falla calidad)
     - name: SonarCloud Quality Gate
-      if: github.ref == 'refs/heads/develop' || (github.event_name == 'pull_request' && github.base_ref == 'main')
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
 
       run: |
         # Espera y chequea si el Quality Gate pasa (falla job si no)
@@ -53,13 +53,14 @@ jobs:
 
     # NUEVO SNYK: Instala Snyk CLI
     - name: Install Snyk
-      if: github.ref == 'refs/heads/develop' || (github.event_name == 'pull_request' && github.base_ref == 'main')
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
 
       run: npm install -g snyk  # Instala vía npm (runner tiene Node)
 
     # NUEVO SNYK: Autentica y escanea (falla en vulns high)
     - name: Snyk Test
-      if: github.ref == 'refs/heads/develop' || (github.event_name == 'pull_request' && github.base_ref == 'main')
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
+
 
       run: |
         snyk auth ${{ secrets.SNYK_TOKEN }}  # Autentica
