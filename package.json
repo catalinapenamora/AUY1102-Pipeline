@@ -103,7 +103,7 @@
     "lint-staged": "^15.2.7",
     "lockfile-lint": "^4.8.0",
     "prettier": "^2.7.1",
-    "semantic-release": "^24.0.0",
+    "semantic-release": "^25.0.2",
     "sort-package-json": "^2.10.0",
     "ts-node-dev": "^2.0.0",
     "tslib": "^2.6.3",
