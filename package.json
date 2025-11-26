@@ -80,7 +80,7 @@
     "@swc/jest": "^0.2.22",
     "@types/jest": "^29.0.2",
     "@types/node": "^20.14.2",
-    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.37.0",
     "babel-plugin-module-resolver": "^4.1.0",
     "dts-bundle-generator": "^6.13.0",
