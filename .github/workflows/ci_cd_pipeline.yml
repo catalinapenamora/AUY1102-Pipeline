@@ -7,16 +7,16 @@ on:
     branches: [ main ]
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest # Entorno Linux para Docker
+    runs-on: ubuntu-latest 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4 # Clona el repo
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0 # Para SonarCloud (necesita commits históricos)
     # SonarCloud - Solo en PRs a main
     - name: SonarCloud Begin
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
-      uses: sonarsource/sonarqube-scan-action@master # Action oficial
+      uses: sonarsource/sonarqube-scan-action@master
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: https://sonarcloud.io
@@ -26,7 +26,7 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: https://sonarcloud.io
-        SONAR_PROJECT_KEY: AUY102-Pipeline # Cambia por tu Project Key exacto en SonarCloud
+        SONAR_PROJECT_KEY: AUY102-Pipeline
         SONAR_PROJECT_BRANCH: ${{ github.head_ref }} # Para branches en PR
     - name: SonarCloud Quality Gate
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
@@ -45,7 +45,7 @@ jobs:
     # Snyk - Solo en PRs a main
     - name: Install Snyk
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
-      run: npm install -g snyk # Instala vía npm (runner tiene Node)
+      run: npm install -g snyk
     - name: Snyk Test
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
       run: |
@@ -57,7 +57,7 @@ jobs:
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
       uses: github/codeql-action/init@v3
       with:
-        languages: python # Para Django/Python
+        languages: python
     - name: Perform CodeQL Analysis
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
       uses: github/codeql-action/analyze@v3
@@ -66,13 +66,12 @@ jobs:
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
       uses: actions/dependency-review-action@v4
       continue-on-error: false
-    - name: Set up Docker Buildx # Para builds multi-plataforma si lo necesitas
+    - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Build Docker image
-      id: build # ID para referenciar después
+      id: build
       run: |
         docker build -t autoparts-app:${{ github.sha }} . # Usa el commit SHA como tag
-      # Si tu Dockerfile está en /backend, cambia a: docker build -f backend/Dockerfile -t ...
     # Docker Scout - Solo en PRs a main
     - name: Docker Scout
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
