@@ -50,7 +50,7 @@ jobs:
         snyk auth ${{ secrets.SNYK_TOKEN }}
         snyk test --severity-threshold=high --file=requirements.txt
       continue-on-error: false
-    # Para GH Advanced Security (escaneo de código y secrets)
+    # GHAS steps (mantén igual)
     - name: Initialize CodeQL
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
       uses: github/codeql-action/init@v3
@@ -59,18 +59,23 @@ jobs:
     - name: Perform CodeQL Analysis
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
       uses: github/codeql-action/analyze@v3
-      # Falla si vulns críticas (configura en Settings > Code security)
-    # NUEVO GHAS: Dependency review (análisis de deps)
     - name: Dependency Review
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
       uses: actions/dependency-review-action@v4
-      # Falla si vulns en deps (usa SBOM de GitHub)
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Build Docker image
       id: build
       run: |
         docker build -t autoparts-app:${{ github.sha }} .
+    # DOCKER SCOUT escanea imagen por vulnerabilidades
+    - name: Docker Scout
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
+      uses: docker/scout-action@v1
+      with:
+        image-ref: autoparts-app:${{ github.sha }}
+        only-critical: true # Falla solo en vulns críticas
+      continue-on-error: false # Interrumpe vulns críticas
     - name: Run unit tests inside container
       run: |
         docker run --rm autoparts-app:${{ github.sha }} /bin/bash -c "cd backend && python manage.py test"
