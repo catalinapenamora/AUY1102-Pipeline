@@ -22,7 +22,9 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: https://sonarcloud.io
 
-    # NUEVO: SonarCloud Execute
+    # NUEVO: SonarCloud Execute (CORREGIDO: Agregado - name: e indentación)
+    - name: SonarCloud Execute
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
       uses: sonarsource/sonarqube-scan-action@master
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -30,7 +32,7 @@ jobs:
         SONAR_PROJECT_KEY: AUY102-Pipeline  # Cambia por tu Project Key exacto en SonarCloud
         SONAR_PROJECT_BRANCH: ${{ github.head_ref }}  # Para branches en PR
 
-    # NUEVO: SonarCloud End (calidad gate - falla si no pasa)
+    # NUEVO: SonarCloud Quality Gate (interrumpe si falla calidad)
     - name: SonarCloud Quality Gate
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
       run: |
