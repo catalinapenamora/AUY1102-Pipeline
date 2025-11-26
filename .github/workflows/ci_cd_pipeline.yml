@@ -12,36 +12,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4 # Clona el repo
       with:
-        fetch-depth: 0  # NUEVO: Para SonarCloud (necesita commits históricos)
-
-    # NUEVO: SonarCloud - Solo en PRs a main
+        fetch-depth: 0 # Para SonarCloud (necesita commits históricos)
+    # SonarCloud steps (mantén igual)
     - name: SonarCloud Begin
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
-
-      uses: sonarsource/sonarqube-scan-action@master  # Action oficial
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: https://sonarcloud.io
-
-    # NUEVO: SonarCloud Execute (CORREGIDO: Agregado - name: e indentación)
-    - name: SonarCloud Execute
-      if: github.event_name == 'pull_request' && github.base_ref == 'main'
-
       uses: sonarsource/sonarqube-scan-action@master
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: https://sonarcloud.io
-        SONAR_PROJECT_KEY: AUY102-Pipeline  # Cambia por tu Project Key exacto en SonarCloud
-        SONAR_PROJECT_BRANCH: ${{ github.head_ref }}  # Para branches en PR
-
-    # NUEVO: SonarCloud Quality Gate (interrumpe si falla calidad)
+    - name: SonarCloud Execute
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
+      uses: sonarsource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: https://sonarcloud.io
+        SONAR_PROJECT_KEY: AUY102-Pipeline # Tu Project Key
+        SONAR_PROJECT_BRANCH: ${{ github.head_ref }}
     - name: SonarCloud Quality Gate
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
-
       run: |
-        # Espera y chequea si el Quality Gate pasa (falla job si no)
-        sleep 30  # Espera que Sonar procese (ajusta si tarda más)
-        # Usa curl para chequear status; falla si != "OK"
+        sleep 30
         RESPONSE=$(curl -s -u ${{ secrets.SONAR_TOKEN }}: https://sonarcloud.io/api/qualitygates/project_status?projectKey=AUY102-Pipeline)
         STATUS=$(echo $RESPONSE | sed 's/.*"status":"\([^"]*\)".*/\1/')
         if [ "$STATUS" != "OK" ]; then
@@ -49,50 +39,51 @@ jobs:
           exit 1
         fi
         echo "Quality Gate passed: $STATUS"
-      continue-on-error: false  # Interrumpe el pipeline si falla
-
-    # NUEVO SNYK: Instala Snyk CLI
+      continue-on-error: false
+    # Snyk steps (mantén igual)
     - name: Install Snyk
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
-
-      run: npm install -g snyk  # Instala vía npm (runner tiene Node)
-
-    # NUEVO SNYK: Autentica y escanea (falla en vulns high)
+      run: npm install -g snyk
     - name: Snyk Test
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
-
-
       run: |
-        snyk auth ${{ secrets.SNYK_TOKEN }}  # Autentica
-        snyk test --severity-threshold=high --file=requirements.txt  # Escanea requirements.txt
-      continue-on-error: false  # Falla job si vulns high/crítica (bloquea merge)
-
-
-    - name: Set up Docker Buildx # Para builds multi-plataforma si lo necesitas
+        snyk auth ${{ secrets.SNYK_TOKEN }}
+        snyk test --severity-threshold=high --file=requirements.txt
+      continue-on-error: false
+    # Para GH Advanced Security (escaneo de código y secrets)
+    - name: Initialize CodeQL
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
+      uses: github/codeql-action/init@v3
+      with:
+        languages: python # Para Django/Python
+    - name: Perform CodeQL Analysis
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
+      uses: github/codeql-action/analyze@v3
+      # Falla si vulns críticas (configura en Settings > Code security)
+    # NUEVO GHAS: Dependency review (análisis de deps)
+    - name: Dependency Review
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
+      uses: actions/dependency-review-action@v4
+      # Falla si vulns en deps (usa SBOM de GitHub)
+    - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Build Docker image
-      id: build # ID para referenciar después
+      id: build
       run: |
-        docker build -t autoparts-app:${{ github.sha }} . # Usa el commit SHA como tag
-      # Si tu Dockerfile está en /backend, cambia a: docker build -f backend/Dockerfile -t ...
+        docker build -t autoparts-app:${{ github.sha }} .
     - name: Run unit tests inside container
       run: |
-        # Ejecuta pruebas dentro del contenedor (ajusta según tu app)
         docker run --rm autoparts-app:${{ github.sha }} /bin/bash -c "cd backend && python manage.py test"
-        # Si las pruebas requieren migraciones o DB: agrega comandos como
-        # docker run ... python manage.py migrate
-        # docker run ... python manage.py test --settings=tu_settings_test
     - name: Login to Docker Hub
-      if: github.event_name == 'push' && github.ref == 'refs/heads/develop' # Solo en push a develop
+      if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Push Docker image to Docker Hub
-      if: success() && github.event_name == 'push' && github.ref == 'refs/heads/develop' # Solo si tests pasan y en develop
+      if: success() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
       run: |
         docker tag autoparts-app:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/autoparts-app:latest
         docker tag autoparts-app:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/autoparts-app:${{ github.sha }}
         docker push ${{ secrets.DOCKER_USERNAME }}/autoparts-app:latest
         docker push ${{ secrets.DOCKER_USERNAME }}/autoparts-app:${{ github.sha }}
-      # Nota: En PRs a main, no pushea; solo build y test. Para deploy real, agregarías un job separado.
