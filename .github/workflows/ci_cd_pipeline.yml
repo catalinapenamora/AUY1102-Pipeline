@@ -48,6 +48,20 @@ jobs:
         echo "Quality Gate passed: $STATUS"
       continue-on-error: false  # Interrumpe el pipeline si falla
 
+    # NUEVO SNYK: Instala Snyk CLI
+    - name: Install Snyk
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
+      run: npm install -g snyk  # Instala vía npm (runner tiene Node)
+
+    # NUEVO SNYK: Autentica y escanea (falla en vulns high)
+    - name: Snyk Test
+      if: github.event_name == 'pull_request' && github.base_ref == 'main'
+      run: |
+        snyk auth ${{ secrets.SNYK_TOKEN }}  # Autentica
+        snyk test --severity-threshold=high --file=requirements.txt  # Escanea requirements.txt
+      continue-on-error: false  # Falla job si vulns high/crítica (bloquea merge)
+
+
     - name: Set up Docker Buildx # Para builds multi-plataforma si lo necesitas
       uses: docker/setup-buildx-action@v3
     - name: Build Docker image
