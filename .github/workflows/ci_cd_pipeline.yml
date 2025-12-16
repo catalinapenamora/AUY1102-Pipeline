@@ -100,5 +100,44 @@ jobs:
         docker tag autoparts-app:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/autoparts-app:${{ github.sha }}
         docker push ${{ secrets.DOCKER_USERNAME }}/autoparts-app:latest
         docker push ${{ secrets.DOCKER_USERNAME }}/autoparts-app:${{ github.sha }}
-# test para comparar en branches    
+  # test para comparar en branches    
   # Nota: En PRs a main, no pushea; solo build y test. Para deploy real, agregarías un job separado.
+  # --- Nuevo Job para la Parte 4: Despliegue Continuo Simulado ---
+  deploy-simulado:
+    # Este job se ejecuta solo si el push es a develop Y el job anterior tuvo éxito
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: 
+      name: Produccion-Simulada
+    
+    steps:
+    - name: 📝 Ejecutar Pruebas de Aceptación (Simulación de A/T)
+      # Aquí se ejecutarían pruebas de aceptación reales contra la imagen recién publicada.
+      run: |
+        echo "Iniciando Pruebas de Aceptación (A/T) en el entorno de Staging..."
+        # Simulación de un proceso que podría tardar y verificar requisitos
+        sleep 5
+        # Lógica de éxito o fallo: por simplicidad, asumimos éxito (exit 0)
+        # Si las pruebas A/T fallaran, usarías 'exit 1'
+        TEST_RESULT="PASSED" 
+        
+        if [ "$TEST_RESULT" == "PASSED" ]; then
+          echo "Pruebas de Aceptación (A/T) superadas."
+          # Esto garantiza que las pruebas A/T son un paso explícito antes del despliegue.
+        else
+          echo "ERROR: Pruebas de Aceptación fallaron. Deteniendo el despliegue."
+          exit 1
+        fi
+        
+    - name: 🚢 Despliegue Simulado a Producción
+      # En un entorno real, aquí se ejecutarían comandos SSH, Terraform, o se actualizaría un deployment en Kubernetes.
+      run: |
+        echo "Iniciando despliegue de la imagen más reciente..."
+        echo "Simulando actualización de servicio en el servidor ${{ secrets.SERVER_IP_PROD }}..."
+        # El despliegue es simulado con un mensaje y usando la variable de imagen
+        IMAGE_TAG="${{ secrets.DOCKER_USERNAME }}/autoparts-app:latest"
+        echo "Desplegando la imagen: $IMAGE_TAG"
+        
+        # Simulación de un reinicio de servicio exitoso
+        echo "Servicio AutoParts actualizado y activo en producción simulada."
