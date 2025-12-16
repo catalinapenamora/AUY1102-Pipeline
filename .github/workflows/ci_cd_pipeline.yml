@@ -51,7 +51,7 @@ jobs:
       run: |
         snyk auth ${{ secrets.SNYK_TOKEN }} # Autentica
         snyk test --severity-threshold=high --file=requirements.txt # Escanea requirements.txt
-      continue-on-error: false #
+      continue-on-error: false 
     # GitHub Advanced Security - Solo en PRs a main
     - name: Initialize CodeQL
       if: github.event_name == 'pull_request' && github.base_ref == 'main'
