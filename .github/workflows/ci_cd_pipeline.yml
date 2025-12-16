@@ -100,4 +100,5 @@ jobs:
         docker tag autoparts-app:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/autoparts-app:${{ github.sha }}
         docker push ${{ secrets.DOCKER_USERNAME }}/autoparts-app:latest
         docker push ${{ secrets.DOCKER_USERNAME }}/autoparts-app:${{ github.sha }}
-      # Nota: En PRs a main, no pushea; solo build y test. Para deploy real, agregarías un job separado.
+# test para comparar en branches    
+  # Nota: En PRs a main, no pushea; solo build y test. Para deploy real, agregarías un job separado.
